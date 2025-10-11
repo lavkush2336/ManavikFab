@@ -106,7 +106,7 @@ $payment_settings = ['razorpay_key' => 'rzp_test_********', 'cod_enabled' => tru
         <div class="row">
             <div class="col-md-3 col-lg-2 sidebar p-3" id="sidebar">
                 <div class="text-center mb-4">
-                    <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4>
+                     <a href="index.php" class="text-decoration-none"> <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4></a>
                     <small class="text-muted">Admin Panel</small>
                 </div>
                 <nav class="nav flex-column">

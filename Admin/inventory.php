@@ -125,7 +125,7 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
         <div class="row">
             <div class="col-md-3 col-lg-2 sidebar p-3" id="sidebar">
                 <div class="text-center mb-4">
-                    <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4>
+                   <a href="index.php" class="text-decoration-none"> <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4></a>
                     <small class="text-muted">Admin Panel</small>
                 </div>
                 <nav class="nav flex-column">
@@ -230,8 +230,9 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
                                         <td><strong>₹<?php echo number_format($item['unit_cost']); ?></strong></td>
                                         <td>
                                             <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-primary" onclick="viewItem(<?php echo $item['id']; ?>)" title="View"><i class="bi bi-eye"></i></button>
                                                 <button class="btn btn-sm btn-outline-success" onclick="addStock(<?php echo $item['id']; ?>)" title="Add Stock"><i class="bi bi-plus-circle"></i></button>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewItem(<?php echo $item['id']; ?>)" title="View"><i class="bi bi-eye"></i></button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="removeStock(<?php echo $item['id']; ?>)" title="Remove Stock"><i class="bi bi-dash-circle"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -312,6 +313,7 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
     <script>
         function viewItem(itemId) { alert('View inventory details for item ID: ' + itemId); }
         function addStock(itemId) { alert('Add stock for item ID: ' + itemId); }
+        function removeStock(itemId) { alert('Remove stock for item ID: ' + itemId); }
     </script>
 </body>
 </html>

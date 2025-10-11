@@ -66,13 +66,41 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
         .navbar { background: white; box-shadow: 0 6px 18px rgba(15,23,42,0.06); padding:.6rem 1rem }
         .navbar h4.mb-0{ font-size:1.5rem; font-weight:800; }
         .table-container { background: white; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 6px 18px rgba(15,23,42,0.04); }
+        .admin-dropdown-item { font-weight:700; font-size:0.95rem; color:#212529; display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.9rem }
+        .dropdown-menu .admin-dropdown-item i { width:20px; display:inline-flex; align-items:center; justify-content:center; }
+        
+        /* --- NEW RESPONSIVE STYLES --- */
         @media (max-width: 991.98px) {
             .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 240px;
+                height: 100%;
+                z-index: 1030;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
             }
-            .sidebar.show { transform: translateX(0); }
-            .main-content { margin-left: 0; }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1020;
+                display: none;
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -81,7 +109,7 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
         <div class="row">
             <div class="col-md-3 col-lg-2 sidebar p-3" id="sidebar">
                 <div class="text-center mb-4">
-                    <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4>
+                     <a href="index.php" class="text-decoration-none"> <h4 class="fw-bold text-dark"><i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab</h4></a>
                     <small class="text-muted">Admin Panel</small>
                 </div>
                 <nav class="nav flex-column">
@@ -316,6 +344,28 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
                 brandForm.reset();
                 addBrandModal.hide();
             });
+
+            // --- Sidebar toggle script ---
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            if (sidebarToggle) {
+                const overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                document.body.appendChild(overlay);
+
+                const closeSidebar = () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                };
+
+                sidebarToggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('show');
+                    overlay.classList.toggle('show');
+                });
+
+                overlay.addEventListener('click', closeSidebar);
+            }
         });
     </script>
 </body>

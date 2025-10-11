@@ -156,6 +156,17 @@
             .login-panel {
                 padding: 2.5rem 1.5rem;
             }
+            /* NEW: Rounded corners for the illustration on small screens */
+            .login-illustration {
+                border-radius: var(--panel-radius); /* Apply the same rounded corners as the card */
+                margin: 2rem; /* Add margin to separate it from the edges */
+            }
+            .login-wrapper {
+                /* On small screens, the wrapper should not be rounded at all to allow for the rounded illustration and the full-width panel */
+                border-radius: 0; 
+                overflow: visible; /* Prevent content from being clipped */
+                display: block; /* Change to block to handle spacing better */
+            }
         }
     </style>
 </head>
@@ -189,8 +200,7 @@
                         <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo !empty($remembered_email) ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="remember">Remember me</label>
                     </div>
-                    <!-- <a href="#" class="text-decoration-none" style="color:#7a6a78;font-size:0.9rem">Forgot?</a> -->
-                </div>
+                    </div>
                 <button type="submit" name="login" class="btn-login w-100">Sign in</button>
             </form>
             <?php
