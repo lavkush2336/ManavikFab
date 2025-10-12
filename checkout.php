@@ -438,67 +438,7 @@ $total = $subtotal + $shipping + $tax;
     </div>
 
     <!-- Footer -->
-    <footer class="footer py-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <h5 class="mb-3">ManavikFab</h5>
-                    <p class="text-muted">Your one-stop destination for premium fashion. We bring you the latest trends in ethnic and western wear.</p>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-2">
-                    <h6 class="mb-3">Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="about.php" class="text-muted text-decoration-none">About Us</a></li>
-                        <li><a href="contact.php" class="text-muted text-decoration-none">Contact</a></li>
-                        <li><a href="products.php" class="text-muted text-decoration-none">Products</a></li>
-                        <li><a href="blog.php" class="text-muted text-decoration-none">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2">
-                    <h6 class="mb-3">Categories</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="products.php?category=ethnic" class="text-muted text-decoration-none">Ethnic Wear</a></li>
-                        <li><a href="products.php?category=western" class="text-muted text-decoration-none">Western Wear</a></li>
-                        <li><a href="products.php?category=sarees" class="text-muted text-decoration-none">Sarees</a></li>
-                        <li><a href="products.php?category=accessories" class="text-muted text-decoration-none">Accessories</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2">
-                    <h6 class="mb-3">Customer Service</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="help.php" class="text-muted text-decoration-none">Help Center</a></li>
-                        <li><a href="shipping.php" class="text-muted text-decoration-none">Shipping Info</a></li>
-                        <li><a href="returns.php" class="text-muted text-decoration-none">Returns</a></li>
-                        <li><a href="size-guide.php" class="text-muted text-decoration-none">Size Guide</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2">
-                    <h6 class="mb-3">Account</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="login.php" class="text-muted text-decoration-none">Login</a></li>
-                        <li><a href="signup.php" class="text-muted text-decoration-none">Sign Up</a></li>
-                        <li><a href="orders.php" class="text-muted text-decoration-none">My Orders</a></li>
-                        <li><a href="wishlist.php" class="text-muted text-decoration-none">Wishlist</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr class="my-4">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0 text-muted">&copy; 2024 ManavikFab. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <img src="images/payment-methods.png" alt="Payment Methods" class="img-fluid" style="height: 30px;">
-                </div>
-            </div>
-        </div>
-    </footer>
+   <?php include 'footer.php'; ?>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
