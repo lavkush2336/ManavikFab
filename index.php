@@ -22,10 +22,6 @@ include 'connection.php';
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
-        body, html {
-            overflow-x: hidden;
-        }
-
         body {
             font-family: 'Poppins', sans-serif;
             background: #ffffff;
@@ -189,15 +185,8 @@ include 'connection.php';
         }
         .hero-sub{color:rgba(255,255,255,0.92);font-size:1.25rem;margin-bottom:1.25rem;max-width:820px}
         .hero-cta .btn{border-radius:999px;padding:1rem 2.4rem;font-weight:800;font-size:1.05rem}
-       .hero-cta .btn-primary-custom {background: linear-gradient(90deg, #ff7ab6, #ff5f99);
-        color: #fff;box-shadow: 0 12px 40px rgba(255, 95, 153, 0.18);margin-top: 103%;}
-        .hero-cta .btn-outline-light {
-    background: rgba(255, 255, 255, 0.9);
-    color: #3a2a3f;
-    font-weight: 700;
-    margin-top: 103%;
-    margin-left: 50%;
-}
+        .hero-cta .btn-primary-custom{background:linear-gradient(90deg,#ff7ab6,#ff5f99);color:#fff;box-shadow:0 12px 40px rgba(255,95,153,0.18)}
+        .hero-cta .btn-outline-light{background:rgba(255,255,255,0.9);color:#3a2a3f;font-weight:700}
         .hero-side-img{display:none}
 
         .category-card, .product-card {
@@ -515,7 +504,9 @@ include 'connection.php';
         <div class="hero-overlay"></div>
         <div class="container hero-content text-center">
             <div data-aos="fade-up" data-aos-duration="1200">
-                <div class="hero-cta d-flex gap-5 justify-content-center">
+                <h2 class="hero-headline">ManavikFab</h2>
+                <p class="hero-sub">Premium fashion for women — curated collections, seasonal drops, and exclusive designs.</p>
+                <div class="hero-cta d-flex gap-3 justify-content-center">
                     <a href="products.php" class="btn btn-primary-custom">Shop Now</a>
                     <a href="blog.php" class="btn btn-outline-light">Explore Article</a>
                 </div>
@@ -620,7 +611,8 @@ include 'connection.php';
         </div>
     </section>
 
-    <?php include 'footer.php'; ?>
+  <?php include 'footer.php'; ?>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
