@@ -1,6 +1,12 @@
-<?PHP
+<?php
     session_start();
     include 'connection.php';
+
+    // Check for the "Remember Me" cookie
+    $remembered_email = "";
+    if (isset($_COOKIE['remember_user_email'])) {
+        $remembered_email = $_COOKIE['remember_user_email'];
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,183 +14,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManavikFab User Login</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Split-screen login styles inspired by reference image */
         :root{
-            --pink-500: #f4b6cc;
-            --pink-600: #f8c9d8;
-            --pink-700: #ffb0d2;
-            --muted: #6b7280;
-            --text: #111827;
+            --pink-100: #f8c9d8;
+            --pink-200: #f4b6cc;
+            --accent-1: #eaaec0;
+            --panel-radius: 16px;
         }
-        html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;-webkit-font-smoothing:antialiased}
-        body{background:linear-gradient(135deg,var(--pink-600) 0%,var(--pink-500) 100%);}
+        html,body{height:100%;}
+        body {
+            margin:0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(180deg,#efe6ee 0%, #f8f0f5 100%);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:2rem;
+        }
+        .login-wrapper{
+            width:100%;
+            max-width:1000px;
+            height:calc(100vh - 4rem);
+            min-height: 550px;
+            border-radius:var(--panel-radius);
+            overflow:hidden;
+            display:flex;
+            box-shadow:0 20px 60px rgba(16,24,40,0.25);
+            background:transparent;
+        }
+        .login-illustration{
+            flex:1.1;
+            background: linear-gradient(135deg,var(--pink-100) 0%, var(--pink-200) 100%);
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:rgba(255,255,255,0.95);
+            padding:2.5rem;
+        }
+        .illustration-inner{
+            position:relative;
+            z-index:2;
+            max-width:320px;
+            text-align:center;
+        }
+        .illustration-title{
+            font-size:1.8rem;
+            font-weight:700;
+            margin-bottom:0.5rem;
+            color:#5b2b4a;
+        }
+        .illustration-sub{
+            color:rgba(0,0,0,0.45);
+            background:rgba(255,255,255,0.6);
+            display:inline-block;
+            padding:0.5rem 1rem;
+            border-radius:999px;
+            font-size:0.95rem;
+            margin-top:1rem;
+        }
+        .login-panel{
+            flex:0.9;
+            background: #ffffff;
+            padding:2.75rem 2.5rem;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+        .brand {
+            font-size:1.6rem;
+            font-weight:700;
+            color:#3a2a3f;
+            letter-spacing:0.2px;
+        }
+        .brand-sub{
+            color:#7a6a78;
+            font-size:0.95rem;
+            margin-top:0.25rem;
+        }
+        .login-form{
+            width:100%;
+            margin-top:1.5rem;
+        }
+        .form-control{
+            border-radius:8px;
+            border:1px solid #e6d7de;
+            padding:0.85rem 0.9rem;
+            box-shadow:none;
+        }
+        .form-control:focus{
+            border-color:var(--accent-1);
+            box-shadow:0 6px 20px rgba(234,174,190,0.12);
+            outline:none;
+        }
+        .btn-login{
+            background: linear-gradient(90deg,var(--pink-200),var(--accent-1));
+            color:#fff;
+            border:none;
+            padding:0.9rem;
+            border-radius:10px;
+            font-weight:700;
+            box-shadow:0 8px 24px rgba(234,174,190,0.18);
+            transition:transform .18s ease, box-shadow .18s ease;
+        }
+        .btn-login:hover{transform:translateY(-2px); box-shadow:0 18px 36px rgba(234,174,190,0.22)}
+        .signup-section{
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #7a6a78;
+        }
+        .signup-section a {
+            color: #5b2b4a;
+            font-weight: 600;
+            text-decoration: none;
+        }
 
-        .login-container{min-height:100vh;display:flex;align-items:stretch}
-        .split{display:flex;width:100%;min-height:100vh}
-
-        /* Left visual column */
-        .visual{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:3rem;background:linear-gradient(180deg,var(--pink-600),var(--pink-500))}
-        .visual .panel{position:relative;z-index:3;color:rgba(17,24,39,0.95);max-width:520px}
-        .visual h2{font-size:2.4rem;margin:0 0 .5rem;color:rgba(122,19,48,0.98);font-weight:800}
-        .visual p{margin:0;color:rgba(91,42,58,0.9)}
-        /* Decorative shapes */
-        .visual .shape-1{position:absolute;right:-12%;top:-8%;width:520px;height:520px;border-radius:40% 60% 40% 60%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.12),transparent 40%),linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0));filter:blur(18px);transform:rotate(12deg);animation:float 8s ease-in-out infinite}
-        .visual .shape-2{position:absolute;left:-10%;bottom:-8%;width:360px;height:360px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.05),transparent);filter:blur(8px);opacity:.9}
-        .visual .grid-lines{position:absolute;inset:18px;background-image:linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);background-size:60px 60px;opacity:.5;pointer-events:none}
-        @keyframes float{0%{transform:translateY(0) rotate(12deg)}50%{transform:translateY(-12px) rotate(14deg)}100%{transform:translateY(0) rotate(12deg)}}
-
-        /* Right column (form) */
-        .right{flex:0 0 520px;display:flex;align-items:center;justify-content:center;padding:4rem}
-        .login-card{background:#fff;border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,0.08);padding:2.5rem;width:100%;max-width:420px;border:1px solid rgba(0,0,0,0.04)}
-        .logo-text{font-size:2.6rem;font-weight:800;color:var(--text);text-align:center;margin-bottom:.25rem}
-        .tagline{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:1.5rem;font-weight:300}
-
-        .input-group{position:relative;margin-bottom:1.4rem}
-        .form-control{border-radius:.75rem;border:1px solid #e6e6e6;padding:1rem 1rem 1rem 3.5rem;font-size:1rem;background:#fff;transition:all .22s ease;box-shadow:inset 0 2px 4px rgba(0,0,0,0.04);width:100%;box-sizing:border-box}
-        .form-control:focus{border-color:var(--pink-600);box-shadow:0 0 0 .22rem rgba(244,182,204,0.18);outline:none}
-        .form-label{position:absolute;top:1rem;left:3.5rem;font-size:1rem;color:var(--muted);transition:all .18s ease;pointer-events:none}
-        .form-control:focus + .form-label,.form-control:not(:placeholder-shown) + .form-label{top:-.6rem;left:1.5rem;font-size:.78rem;color:var(--pink-600);background:#fff;padding:0 .3rem}
-        .input-icon{position:absolute;top:50%;left:1.1rem;transform:translateY(-50%);color:#a0a0a0;width:20px;height:20px}
-
-        .btn-login{background:linear-gradient(90deg,var(--pink-600),var(--pink-500));color:var(--text);border:none;padding:.95rem;border-radius:.75rem;font-weight:700;font-size:1.05rem;transition:transform .22s ease,box-shadow .22s ease;width:100%;box-shadow:0 10px 30px rgba(244,182,204,0.18)}
-        .btn-login:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(244,182,204,0.22)}
-
-        .signup-section{margin-top:1rem;text-align:center;display:flex;justify-content:center;align-items:center;gap:.5rem;color:var(--muted)}
-        .btn-signup{background:var(--pink-600);color:var(--text);border:0;padding:.5rem .9rem;border-radius:.6rem;font-weight:600}
-        .btn-signup:hover{background:var(--pink-500);transform:scale(1.03)}
-
-        .error-message{display:none;color:#dc3545;font-size:.85rem;margin-top:.4rem}
-
-        @media(max-width:991px){.split{flex-direction:column}.visual{flex:0 0 220px;height:220px;padding:1.25rem}.right{flex:1 1 auto;padding:2rem}.login-card{margin:0 auto}}
+        /* UPDATED: This block now perfectly matches the admin login page's responsive styles */
+        @media (max-width: 900px){
+            body {
+                padding: 0;
+                height: auto;
+                min-height: 100%;
+            }
+            .login-wrapper {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .login-illustration {
+                padding: 2rem 1rem;
+            }
+            .login-panel {
+                padding: 2.5rem 1.5rem;
+            }
+            .login-illustration {
+                border-radius: var(--panel-radius);
+                margin: 2rem;
+            }
+            .login-wrapper {
+                border-radius: 0;
+                overflow: visible;
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="split">
-            <div class="visual">
-                <div class="shape-1" aria-hidden="true"></div>
-                <div class="shape-2" aria-hidden="true"></div>
-                <div class="grid-lines" aria-hidden="true"></div>
-                <div class="panel">
-                    <h2>ManavikFab</h2>
-                    <p>Timeless designs, crafted for you. Discover handcrafted elegance and contemporary silhouettes.</p>
-                </div>
-            </div>
-            <div class="right">
-                <div class="login-card">
-                    <div class="logo-text">ManavikFab</div>
-                    <div class="tagline">"Wear a Style That You Love."</div>
-                    <form id="loginForm" method="POST">
-                        <div class="input-group">
-                            <div class="relative">
-                                <input type="email" id="email" class="form-control" placeholder=" " required name="email">
-                                <label for="email" class="form-label">Email Address</label>
-                                <span class="input-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
-                                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-6.757 4.062L1 5.383V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5.383Z"/>
-                                    </svg>
-                                </span>
-                            </div>
-                            <div id="email-error" class="error-message"></div>
-                        </div>
-                        <div class="input-group">
-                            <div class="relative">
-                                <input type="password" id="password" class="form-control" placeholder=" " required name="pass">
-                                <label for="password" class="form-label">Password</label>
-                                <span class="input-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
-                                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
-                                    </svg>
-                                </span>
-                            </div>
-                            <div id="password-error" class="error-message"></div>
-                        </div>
-                        <button type="submit" class="btn-login" name="log">Login</button>
-                        <div class="signup-section">
-                            <span>Don't have an Account?</span>
-                            <a href="signup.php"><button type="button" class="btn-signup">Sign Up</button></a>
-                        </div>
-                    </form>
-                    <?PHP
-                        if(isset($_POST['log']))
-                        {
-                            $email=$_POST['email'];
-                            $pass=$_POST['pass'];
-                            $sql="SELECT * FROM `User` WHERE `Email`='$email'";
-                            $result=mysqli_query($con,$sql);
-                            $rows=mysqli_num_rows($result);
-                            if($rows>0)
-                            {
-                                while($row=mysqli_fetch_assoc($result))
-                                {
-                                    $hpass=$row['Password'];
-                                    $id=$row['UserID'];
-                                    $name=$row['Name'];
-                                }
-                                if(password_verify($pass, $hpass))
-                                {
-                                    $_SESSION['userid']=$id;
-                                    $_SESSION['name']=$name;
-                                    $_SESSION['email']=$email;
-                                    echo "<script>window.open('index.php','_self')</script>";
-                                }
-                                else
-                                {
-                                    echo "<div class='alert alert-danger mt-4' role='alert'>\n  Invalid Password!\n</div>";
-                                }
-                            }
-                            else
-                            {
-                                echo "<div class='alert alert-danger mt-4' role='alert'>\n  User not Found!\n</div>";
-                            }
-                        }
-                    ?>
-                </div>
+    <div class="login-wrapper" role="main">
+        <div class="login-illustration" aria-hidden="true">
+            <div class="illustration-inner">
+                <img src="images/image1.png">
+                <h3 class="illustration-title">Welcome to ManavikFab</h3>
+                <div class="illustration-sub">Premium fashion, curated for you.</div>
             </div>
         </div>
+
+        <div class="login-panel">
+            <div>
+                <div class="brand">ManavikFab <small class="text-muted">User Login</small></div>
+                <div class="brand-sub">Sign in to continue to your account</div>
+            </div>
+
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="login-form">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@domain.com" value="<?php echo htmlspecialchars($remembered_email); ?>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="pass" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo !empty($remembered_email) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                </div>
+                <button type="submit" name="log" class="btn-login w-100">Login</button>
+            </form>
+            
+            <div class="signup-section">
+                Don't have an Account? <a href="signup.php">Sign Up</a>
+            </div>
+
+            <?php
+                if (isset($_POST['log'])) {
+                    $email = $_POST['email'];
+                    $pass = $_POST['pass'];
+
+                    $stmt = mysqli_prepare($con, "SELECT UserID, Name, Password FROM `User` WHERE `Email` = ?");
+                    mysqli_stmt_bind_param($stmt, "s", $email);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+
+                    if (mysqli_num_rows($result) > 0) {
+                        $row = mysqli_fetch_assoc($result);
+                        if (password_verify($pass, $row['Password'])) {
+                            if (!empty($_POST['remember'])) {
+                                setcookie("remember_user_email", $email, time() + (86400 * 30), "/");
+                            } else {
+                                if (isset($_COOKIE['remember_user_email'])) {
+                                    setcookie("remember_user_email", "", time() - 3600, "/");
+                                }
+                            }
+                            
+                            $_SESSION['userid'] = $row['UserID'];
+                            $_SESSION['name'] = $row['Name'];
+                            $_SESSION['email'] = $email;
+                            echo "<script>window.open('index.php','_self')</script>";
+                        } else {
+                            echo "<div class='alert alert-danger mt-4' role='alert'>Invalid Password!</div>";
+                        }
+                    } else {
+                        echo "<div class='alert alert-danger mt-4' role='alert'>User not Found!</div>";
+                    }
+                    mysqli_stmt_close($stmt);
+                }
+            ?>
+        </div>
     </div>
-    <script>
-        // function validateForm(event) {
-        //     event.preventDefault();
-        //     const email = document.getElementById('email').value;
-        //     const password = document.getElementById('password').value;
-        //     const emailError = document.getElementById('email-error');
-        //     const passwordError = document.getElementById('password-error');
-        //     let isValid = true;
-
-        //     // Reset error messages
-        //     emailError.style.display = 'none';
-        //     emailError.textContent = '';
-        //     passwordError.style.display = 'none';
-        //     passwordError.textContent = '';
-
-        //     // Email validation
-        //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        //     if (!emailRegex.test(email)) {
-        //         emailError.textContent = 'Please enter a valid email address';
-        //         emailError.style.display = 'block';
-        //         isValid = false;
-        //     }
-
-        //     // Password validation
-        //     if (password.length < 6) {
-        //         passwordError.textContent = 'Password must be at least 6 characters long';
-        //         passwordError.style.display = 'block';
-        //         isValid = false;
-        //     }
-
-        //     if (isValid) {
-        //         alert('Login successful! Redirecting...');
-        //         // window.location.href = '/dashboard'; // Replace with actual redirect
-        //     }
-
-        //     return isValid;
-        // }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
