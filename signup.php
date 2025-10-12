@@ -247,7 +247,7 @@
                 }
             ?>
             <div class="login-section">
-                Already have an account? <a href="user-login.php">Login</a>
+                Already have an account? <a href="login.php">Login</a>
             </div>
         </div>
     </div>
