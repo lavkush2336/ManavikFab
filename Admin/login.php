@@ -1,12 +1,7 @@
 <?php
+    //$pass='Sikandar@int11';
     session_start();
     include '../connection.php';
-
-    // Check for the "Remember Me" cookie at the top of the page
-    $remembered_email = "";
-    if (isset($_COOKIE['remember_email'])) {
-        $remembered_email = $_COOKIE['remember_email'];
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -189,18 +184,12 @@
             <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="login-form">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="you@domain.com" value="<?php echo htmlspecialchars($remembered_email); ?>" required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@domain.com" required>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" id="password" name="pass" class="form-control" placeholder="Enter your password" required>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo !empty($remembered_email) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="remember">Remember me</label>
-                    </div>
-                    </div>
                 <button type="submit" name="login" class="btn-login w-100">Sign in</button>
             </form>
             <?php
@@ -215,20 +204,10 @@
 
                     if (mysqli_num_rows($result) > 0) {
                         $row = mysqli_fetch_assoc($result);
-                        if (password_verify($pass, $row['Password'])) {
-                            // On successful login, check if "Remember Me" is ticked
-                            if (!empty($_POST['remember'])) {
-                                // Set cookie for 30 days
-                                setcookie("remember_email", $email, time() + (86400 * 30), "/");
-                            } else {
-                                // If not ticked, delete any existing cookie
-                                if (isset($_COOKIE['remember_email'])) {
-                                    setcookie("remember_email", "", time() - 3600, "/");
-                                }
-                            }
-                            
+                        if (password_verify($pass, $row['Password']))
+                        {
                             $_SESSION['adminid'] = $row['AdminID'];
-                            echo "<script>window.open('../Admin','_self')</script>";
+                            echo "<script>window.open('index.php','_self')</script>";
                         } else {
                             echo "<div class='alert alert-danger mt-4' role='alert'>Invalid Password!</div>";
                         }

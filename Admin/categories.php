@@ -3,21 +3,106 @@ session_start();
 include '../connection.php';
 
 // Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    // header("Location: login.php");
-    // exit();
+if (!isset($_SESSION['adminid'])) {
+    header("Location: login.php");
+    exit();
 }
 
-// Sample categories data
-$categories = [
-    ['id' => 1, 'name' => 'Ethnic Wear', 'description' => 'Traditional Indian ethnic wear including sarees, lehengas, and kurtis', 'products_count' => 45, 'status' => 'Active', 'created_date' => '2023-01-15', 'parent_category' => null],
-    ['id' => 2, 'name' => 'Western Wear', 'description' => 'Modern western clothing including dresses, tops, and jeans', 'products_count' => 38, 'status' => 'Active', 'created_date' => '2023-01-20', 'parent_category' => null],
-    ['id' => 3, 'name' => 'Accessories', 'description' => 'Fashion accessories including jewelry, bags, and footwear', 'products_count' => 52, 'status' => 'Active', 'created_date' => '2023-02-01', 'parent_category' => null],
-    ['id' => 4, 'name' => 'Sarees', 'description' => 'Traditional Indian sarees in various fabrics and designs', 'products_count' => 28, 'status' => 'Active', 'created_date' => '2023-01-25', 'parent_category' => 'Ethnic Wear'],
-    ['id' => 5, 'name' => 'Lehengas', 'description' => 'Bridal and party wear lehengas with intricate designs', 'products_count' => 15, 'status' => 'Active', 'created_date' => '2023-02-10', 'parent_category' => 'Ethnic Wear'],
-    ['id' => 6, 'name' => 'Dresses', 'description' => 'Casual and party dresses for all occasions', 'products_count' => 22, 'status' => 'Active', 'created_date' => '2023-01-30', 'parent_category' => 'Western Wear'],
-    ['id' => 7, 'name' => 'Jewelry', 'description' => 'Traditional and modern jewelry pieces', 'products_count' => 35, 'status' => 'Inactive', 'created_date' => '2023-02-15', 'parent_category' => 'Accessories']
-];
+// ==========================================================
+// PHP LOGIC BLOCKS (All centralized at the top for stability)
+// ==========================================================
+
+// --- 1. ADD CATEGORY LOGIC (CSAVE) ---
+if(isset($_POST['csave']))
+{
+    // FIX: Sanitize all string inputs to prevent SQL errors
+    $cname=mysqli_real_escape_string($con, $_POST['cname']);
+    $slug=mysqli_real_escape_string($con, $_POST['slug']);
+    $desc=mysqli_real_escape_string($con, $_POST['desc']);
+    $pcat=mysqli_real_escape_string($con, $_POST['pcat']);
+    $status=$_POST['status'];
+    
+    // Convert Status string to database integer (1 or 0)
+    $status_int=($status=="Active") ? 1 : 0;
+
+    // Execute insertion query
+    $sql="INSERT INTO `Category`(`Name`, `Slug`, `Description`, `PCategory`, `Status`) VALUES ('$cname','$slug','$desc','$pcat','$status_int')";
+    $result=mysqli_query($con,$sql);
+    
+    if($result) {
+        header("Location: categories.php");
+    } else {
+        header("Location: categories.php?status=db_error");
+    }
+    exit(); 
+}
+
+// --- 2. EDIT CATEGORY LOGIC (CATEGORY_UPDATE) ---
+if(isset($_POST['category_update']))
+{
+    // Sanitize all inputs 
+    $id = mysqli_real_escape_string($con, $_POST['categoryId']);
+    $cname = mysqli_real_escape_string($con, $_POST['cname']);
+    $slug = mysqli_real_escape_string($con, $_POST['slug']);
+    $desc = mysqli_real_escape_string($con, $_POST['desc']);
+    $pcat = mysqli_real_escape_string($con, $_POST['pcat']);
+    $status = $_POST['status'];
+    
+    // Convert Status string to database integer (1 or 0)
+    if($status == "Active")
+    {
+        $status_int = 1;
+    }
+    else
+    {
+        $status_int = 0;
+    }
+
+    // Perform SQL UPDATE query
+    $sql = "UPDATE `Category` SET 
+                `Name` = '$cname', 
+                `Slug` = '$slug', 
+                `Description` = '$desc', 
+                `PCategory` = '$pcat', 
+                `Status` = '$status_int' 
+            WHERE `CategoryID` = '$id'";
+            
+    $result = mysqli_query($con, $sql);
+    
+    if ($result) {
+        header("Location: categories.php");
+    } 
+    exit(); 
+}
+
+// --- 3. BRAND SUBMISSION LOGIC (BSAVE) ---
+if(isset($_POST['bsave']))
+{
+    $name = mysqli_real_escape_string($con, $_POST['bname']);
+    $logo_path_for_db = ''; 
+
+    if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+        
+        $file_tmp_name = $_FILES['logo']['tmp_name'];
+        $original_file_name = basename($_FILES['logo']['name']);
+        $target_dir = dirname(dirname(__FILE__)) . "/images/"; 
+        $new_file_name = time() . "_brand_" . $original_file_name; 
+        $target_file = $target_dir . $new_file_name;
+
+        if (move_uploaded_file($file_tmp_name, $target_file)) {
+            $logo_path_for_db = $new_file_name; 
+        } 
+    }
+    
+    $sql = "INSERT INTO `brand`(`Name`, `Logo`) VALUES ('$name','$logo_path_for_db')";
+    $result = mysqli_query($con, $sql);
+    
+    if ($result) {
+        header("Location: categories.php");
+    } 
+    exit(); 
+}
+// ==========================================================
 
 $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
 ?>
@@ -33,6 +118,7 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* ... (CSS unchanged) ... */
         *, *::before, *::after { box-sizing: border-box; }
         html, body { overflow-x: hidden; }
         body {
@@ -135,7 +221,7 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
                             <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addBrandModal">
                                 <i class="bi bi-tags me-2"></i>Add Brand
                             </button>
-                            <button class="btn btn-primary me-3" id="addCategoryBtn">
+                            <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal"> 
                                 <i class="bi bi-plus-circle me-2"></i>Add Category
                             </button>
                             <div class="dropdown">
@@ -151,7 +237,6 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
                         </div>
                     </div>
                 </nav>
-
                 <div class="p-4">
                     <div class="table-container">
                         <div class="table-responsive">
@@ -163,35 +248,83 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
                                         <th>Description</th>
                                         <th>Parent</th>
                                         <th>Products</th>
+                                        <th>Slug</th>
                                         <th>Status</th>
-                                        <th>Created</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
+                                <?PHP
+                    $sql="SELECT * FROM `Category`";
+                    $result=mysqli_query($con,$sql);
+                    $rows=mysqli_num_rows($result);
+                    ?>
                                 <tbody>
-                                    <?php foreach($categories as $category): ?>
-                                    <tr data-id="<?php echo $category['id']; ?>">
-                                        <td><strong><?php echo $category['id']; ?></strong></td>
-                                        <td class="category-name"><?php echo $category['name']; ?></td>
-                                        <td class="category-description"><?php echo $category['description']; ?></td>
+                                    <?PHP
+                    if($rows>0)
+                    {
+                        while($row=mysqli_fetch_assoc($result))
+                        {
+                            $id=$row['CategoryID'];
+                            $name=$row['Name'];
+                            $slug=$row['Slug'];
+                            $desc=$row['Description'];
+                            $pcat=$row['PCategory'];
+                            $status_int=$row['Status'];
+                            $status_text=($status_int==1) ? "Active" : "InActive";
+                            $status_badge=($status_int==1) ? "success" : "secondary";
+                            if($pcat==0)
+                            {
+                                $pcat="No Parent";
+                            }
+                            else if($pcat==1)
+                            {
+                                $pcat="Ethnic Wear";
+                            }
+                            else if($pcat==2)
+                            {
+                                $pcat="Western Wear";
+                            }
+                            else
+                            {
+                                $pcat="Accessories";
+                            }
+                            ?>
+                                    <tr data-id="<?PHP echo $id; ?>" 
+                                        data-name="<?PHP echo htmlspecialchars($name); ?>"
+                                        data-slug="<?PHP echo htmlspecialchars($slug); ?>"
+                                        data-desc="<?PHP echo htmlspecialchars($desc); ?>"
+                                        data-pcat="<?PHP echo htmlspecialchars($pcat); ?>"
+                                        data-status="<?PHP echo htmlspecialchars($status_text); ?>">
+                                        <td><strong><?PHP echo $id; ?></strong></td>
+                                        <td class="category-name"><?PHP echo $name; ?></td>
+                                        <td class="category-description"><?PHP echo $desc; ?></td>
                                         <td class="parent-category">
-                                            <?php if($category['parent_category']): ?>
-                                                <span class="badge bg-light text-dark"><?php echo $category['parent_category']; ?></span>
-                                            <?php else: ?>
-                                                <span class="text-muted">—</span>
-                                            <?php endif; ?>
+                                                <span class="badge bg-light text-dark"><?PHP echo $pcat; ?></span>
                                         </td>
-                                        <td><?php echo $category['products_count']; ?></td>
-                                        <td class="category-status"><span class="badge bg-<?php echo $category['status'] == 'Active' ? 'success' : 'secondary'; ?>"><?php echo $category['status']; ?></span></td>
-                                        <td><?php echo date('M d, Y', strtotime($category['created_date'])); ?></td>
+                                        <td>0</td>
+                                        <td><?PHP echo $slug; ?></td>
+                                        <td class="category-status"><span class="badge bg-<?PHP echo $status_badge; ?>"><?PHP echo $status_text; ?></span></td>
                                         <td>
                                             <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-success edit-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                                                <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                                                <button class="btn btn-sm btn-outline-success edit-btn" title="Edit" 
+                                                        data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                                        onclick="populateEditModal(this)">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <a href="delete.php?catid=<?PHP echo $id;?>" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
                                             </div>
                                         </td>
                                     </tr>
-                                    <?php endforeach; ?>
+                                    <?PHP
+                        }
+                    }
+                    else
+                    {
+                        echo "<td colspan='8'><div class='alert alert-warning mt-3' role='alert'>
+  No Category Added Yet!
+</div></td>";
+                    }
+                ?>
                                 </tbody>
                             </table>
                         </div>
@@ -201,57 +334,112 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
         </div>
     </div>
     
-    <div class="modal fade" id="categoryFormModal" tabindex="-1">
+    <div class="modal fade" id="addCategoryModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="categoryModalTitle"></h5>
+                    <h5 class="modal-title" id="addCategoryModalTitle"><i class="bi bi-plus-circle me-2"></i>Add New Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="categoryForm">
-                        <input type="hidden" id="categoryId">
+                    <form id="addCategoryForm" method="POST" action="categories.php"> 
+                        <input type="hidden" name="categoryId"> 
+                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Category Name *</label>
-                                <input type="text" id="categoryName" class="form-control" placeholder="Enter category name" required>
+                                <input type="text" id="addCategoryName" class="form-control" placeholder="Enter category name" required name="cname">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Slug</label>
-                                <input type="text" id="categorySlug" class="form-control" placeholder="e.g., ethnic-wear" disabled>
+                                <label class="form-label">Slug *</label>
+                                <input type="text" id="addCategorySlug" class="form-control" placeholder="e.g., ethnic-wear" required name="slug">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Description</label>
-                            <textarea class="form-control" id="categoryDescription" rows="3" placeholder="Enter a brief category description"></textarea>
+                            <textarea class="form-control" id="addCategoryDescription" rows="3" placeholder="Enter a brief category description" required name="desc"></textarea>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Parent Category</label>
-                                <select class="form-select" id="parentCategory">
-                                    <option value="">No Parent</option>
-                                    <?php foreach($parent_categories_options as $parent): ?>
-                                        <option value="<?php echo $parent; ?>"><?php echo $parent; ?></option>
-                                    <?php endforeach; ?>
+                                <select class="form-select" id="addParentCategory" name="pcat">
+                                    <option value="0">No Parent</option>
+                                    <option value="1">Ethnic Wear</option>
+                                    <option value="2">Western Wear</option>
+                                    <option value="3">Accessories</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" id="categoryStatus">
+                                <select class="form-select" id="addCategoryStatus" name="status">
                                     <option value="Active">Active</option>
                                     <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
                         </div>
-                    </form>
-                </div>
+                        </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveCategoryBtn"></button>
+                    <button type="submit" class="btn btn-primary" name="csave">Add Category</button>
                 </div>
+                    </form>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editCategoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalTitle"><i class="bi bi-pencil-square me-2"></i>Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm" method="POST" action="categories.php"> 
+                        <input type="hidden" id="editCategoryId" name="categoryId"> 
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category Name *</label>
+                                <input type="text" id="editCategoryName" class="form-control" required name="cname">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Slug *</label>
+                                <input type="text" id="editCategorySlug" class="form-control" required name="slug">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editCategoryDescription" rows="3" required name="desc"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Parent Category</label>
+                                <select class="form-select" id="editParentCategory" name="pcat">
+                                    <option value="0">No Parent</option>
+                                    <option value="1">Ethnic Wear</option>
+                                    <option value="2">Western Wear</option>
+                                    <option value="3">Accessories</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="editCategoryStatus" name="status">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success" name="category_update">Save Changes</button>
+                </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal fade" id="addBrandModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -261,21 +449,21 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addBrandForm">
+                    <form  id="addBrandForm" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="brandName" class="form-label">Brand Name *</label>
-                            <input type="text" id="brandName" class="form-control" placeholder="Enter brand name" required>
+                            <input type="text" id="brandName" class="form-control" placeholder="Enter brand name" required name="bname">
                         </div>
                         <div class="mb-3">
                             <label for="brandLogo" class="form-label">Brand Logo</label>
-                            <input type="file" id="brandLogo" class="form-control" accept="image/*">
+                            <input type="file" id="brandLogo" class="form-control" accept="image/*" required name="logo">
                         </div>
-                    </form>
-                </div>
+                        </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="saveBrandBtn">Add Brand</button>
+                    <button type="submit" class="btn btn-success" name="bsave">Add Brand</button>
                 </div>
+                    </form>
             </div>
         </div>
     </div>
@@ -283,69 +471,35 @@ $parent_categories_options = ['Ethnic Wear', 'Western Wear', 'Accessories'];
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- Universal Category Modal Logic ---
-            const categoryModal = new bootstrap.Modal(document.getElementById('categoryFormModal'));
-            const categoryModalTitle = document.getElementById('categoryModalTitle');
-            const saveCategoryBtn = document.getElementById('saveCategoryBtn');
-            const categoryForm = document.getElementById('categoryForm');
-            const tableBody = document.querySelector('.table tbody');
+            
+            // --- JAVASCRIPT FOR EDIT MODAL POPULATION ---
+            const editModalElement = document.getElementById('editCategoryModal');
 
-            document.getElementById('addCategoryBtn').addEventListener('click', function() {
-                categoryForm.reset();
-                document.getElementById('categoryId').value = '';
-                categoryModalTitle.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add New Category';
-                saveCategoryBtn.textContent = 'Add Category';
-                saveCategoryBtn.className = 'btn btn-primary';
-                categoryModal.show();
-            });
+            // Function to populate the edit modal fields
+            window.populateEditModal = function(button) {
+                const row = button.closest('tr');
+                
+                // Populate the form fields using the data attributes
+                document.getElementById('editCategoryId').value = row.dataset.id;
+                document.getElementById('editCategoryName').value = row.dataset.name;
+                document.getElementById('editCategorySlug').value = row.dataset.slug;
+                document.getElementById('editCategoryDescription').value = row.dataset.desc; 
+                
+                // Set SELECT fields using .value
+                document.getElementById('editParentCategory').value = row.dataset.pcat;
+                document.getElementById('editCategoryStatus').value = row.dataset.status;
+            }
 
-            tableBody.addEventListener('click', function(event) {
+            // Optional: Attach listener to the whole table for slightly better performance/cleaner HTML
+            document.querySelector('.table tbody').addEventListener('click', function(event) {
                 const editButton = event.target.closest('.edit-btn');
-                if (!editButton) return;
-                const row = editButton.closest('tr');
-                document.getElementById('categoryId').value = row.dataset.id;
-                document.getElementById('categoryName').value = row.querySelector('.category-name').textContent.trim();
-                document.getElementById('categoryDescription').value = row.querySelector('.category-description').textContent.trim();
-                document.getElementById('parentCategory').value = row.querySelector('.parent-category .badge')?.textContent.trim() || '';
-                document.getElementById('categoryStatus').value = row.querySelector('.category-status .badge').textContent.trim();
-                categoryModalTitle.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Edit Category';
-                saveCategoryBtn.textContent = 'Save Changes';
-                saveCategoryBtn.className = 'btn btn-success';
-                categoryModal.show();
+                if (editButton) {
+                    populateEditModal(editButton);
+                }
             });
 
-            saveCategoryBtn.addEventListener('click', function() {
-                const id = document.getElementById('categoryId').value;
-                const name = document.getElementById('categoryName').value;
-                if (!name) {
-                    alert('Category Name is required.');
-                    return;
-                }
-                if (id) {
-                    alert(`Simulating update for Category ID: ${id}`);
-                } else {
-                    alert(`Simulating adding new category: "${name}"`);
-                }
-                categoryModal.hide();
-            });
 
-            // --- "Add Brand" Modal Logic ---
-            const saveBrandButton = document.getElementById('saveBrandBtn');
-            const addBrandModal = new bootstrap.Modal(document.getElementById('addBrandModal'));
-            const brandForm = document.getElementById('addBrandForm');
-
-            saveBrandButton.addEventListener('click', function() {
-                const brandName = document.getElementById('brandName').value;
-                if(!brandName) {
-                    alert('Brand Name is required.');
-                    return;
-                }
-                alert('Brand "' + brandName + '" added successfully!');
-                brandForm.reset();
-                addBrandModal.hide();
-            });
-
-            // --- Sidebar toggle script ---
+            // --- Sidebar toggle script (unchanged) ---
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.getElementById('sidebarToggle');
 

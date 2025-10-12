@@ -3,23 +3,92 @@ session_start();
 include '../connection.php';
 
 // Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    // header("Location: login.php");
-    // exit();
+if (!isset($_SESSION['adminid'])) {
+    header("Location: login.php");
+    exit();
 }
 
-// Sample inventory data
-$inventory_items = [
-    ['id' => 1, 'product_name' => 'Silk Saree - Traditional Red', 'sku' => 'SS-RED-001', 'category' => 'Sarees', 'current_stock' => 25, 'min_stock' => 10, 'max_stock' => 100, 'unit_cost' => 1200, 'total_value' => 30000, 'last_updated' => '2024-01-15', 'status' => 'In Stock', 'supplier' => 'Silk Weavers Ltd', 'location' => 'Warehouse A'],
-    ['id' => 2, 'product_name' => 'Bridal Lehenga - Gold Embroidered', 'sku' => 'BL-GOLD-002', 'category' => 'Lehengas', 'current_stock' => 8, 'min_stock' => 5, 'max_stock' => 50, 'unit_cost' => 3500, 'total_value' => 28000, 'last_updated' => '2024-01-14', 'status' => 'Low Stock', 'supplier' => 'Royal Garments', 'location' => 'Warehouse B'],
-    ['id' => 3, 'product_name' => 'Cotton Kurti - Blue Floral', 'sku' => 'CK-BLUE-003', 'category' => 'Kurtis', 'current_stock' => 45, 'min_stock' => 20, 'max_stock' => 80, 'unit_cost' => 450, 'total_value' => 20250, 'last_updated' => '2024-01-13', 'status' => 'In Stock', 'supplier' => 'Cotton Crafts', 'location' => 'Warehouse A'],
-    ['id' => 4, 'product_name' => 'Party Dress - Black Sequined', 'sku' => 'PD-BLACK-004', 'category' => 'Dresses', 'current_stock' => 0, 'min_stock' => 5, 'max_stock' => 30, 'unit_cost' => 1800, 'total_value' => 0, 'last_updated' => '2024-01-12', 'status' => 'Out of Stock', 'supplier' => 'Fashion Forward', 'location' => 'Warehouse C'],
-    ['id' => 5, 'product_name' => 'Silver Jewelry Set', 'sku' => 'SJS-SILVER-005', 'category' => 'Jewelry', 'current_stock' => 12, 'min_stock' => 10, 'max_stock' => 40, 'unit_cost' => 800, 'total_value' => 9600, 'last_updated' => '2024-01-11', 'status' => 'Low Stock', 'supplier' => 'Silver Artisans', 'location' => 'Warehouse B'],
-    ['id' => 6, 'product_name' => 'Designer Handbag - Brown Leather', 'sku' => 'DH-BROWN-006', 'category' => 'Accessories', 'current_stock' => 18, 'min_stock' => 10, 'max_stock' => 60, 'unit_cost' => 1200, 'total_value' => 21600, 'last_updated' => '2024-01-10', 'status' => 'In Stock', 'supplier' => 'Leather Crafts', 'location' => 'Warehouse A']
-];
+// FIX: SAVE3 was failing because the quantity input field had duplicate name attributes.
+if(isset($_POST['save3']))
+{
+    $productID = $_POST['pid2'];
+    $quantityToRemove = $_POST['qty2']; // This matches the fixed HTML name="qty2"
 
-$categories = ['All', 'Sarees', 'Lehengas', 'Kurtis', 'Dresses', 'Jewelry', 'Accessories'];
-$statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
+    if (!empty($productID) && !empty($quantityToRemove) && is_numeric($quantityToRemove) && $quantityToRemove > 0) {
+        // Ensure stock doesn't go below zero
+        $sql = "UPDATE product SET Quantity = GREATEST(0, Quantity - ?) WHERE ProductID = ?";
+        $stmt = mysqli_prepare($con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $quantityToRemove, $productID);
+        mysqli_stmt_execute($stmt);
+        header("Location: inventory.php?status=stock_removed");
+        exit();
+    }
+}
+
+if(isset($_POST['save2']))
+{
+    $productID = $_POST['pid'];
+    $quantityToAdd = $_POST['qty1'];
+
+    if (!empty($productID) && !empty($quantityToAdd) && is_numeric($quantityToAdd) && $quantityToAdd > 0) {
+        $sql = "UPDATE product SET Quantity = Quantity + ? WHERE ProductID = ?";
+        $stmt = mysqli_prepare($con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $quantityToAdd, $productID);
+        mysqli_stmt_execute($stmt);
+        header("Location: inventory.php?status=stock_added");
+        exit();
+    }
+}
+
+// --- START: Handle General Stock Adjustment from Header Modal ---
+if (isset($_POST['general_add_stock'])) {
+    $productID = $_POST['product_id_select'];
+    $quantityToAdd = $_POST['quantity'];
+
+    if (!empty($productID) && !empty($quantityToAdd) && is_numeric($quantityToAdd) && $quantityToAdd > 0) {
+        $sql = "UPDATE product SET Quantity = Quantity + ? WHERE ProductID = ?";
+        $stmt = mysqli_prepare($con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $quantityToAdd, $productID);
+        mysqli_stmt_execute($stmt);
+        header("Location: inventory.php?status=stock_added");
+        exit();
+    }
+}
+// --- END: Handle General Stock ---
+
+// --- START: Handle Add Stock (per-item) Form Submission ---
+if (isset($_POST['add_stock'])) {
+    $productID = $_POST['product_id'];
+    $quantityToAdd = $_POST['quantity'];
+
+    if (!empty($productID) && !empty($quantityToAdd) && is_numeric($quantityToAdd) && $quantityToAdd > 0) {
+        $sql = "UPDATE product SET Quantity = Quantity + ? WHERE ProductID = ?";
+        $stmt = mysqli_prepare($con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $quantityToAdd, $productID);
+        mysqli_stmt_execute($stmt);
+        header("Location: inventory.php?status=stock_added");
+        exit();
+    }
+}
+// --- END: Handle Add Stock ---
+
+// --- START: Handle Remove Stock (per-item) Form Submission ---
+if (isset($_POST['remove_stock'])) {
+    $productID = $_POST['product_id'];
+    $quantityToRemove = $_POST['quantity'];
+
+    if (!empty($productID) && !empty($quantityToRemove) && is_numeric($quantityToRemove) && $quantityToRemove > 0) {
+        // Ensure stock doesn't go below zero
+        $sql = "UPDATE product SET Quantity = GREATEST(0, Quantity - ?) WHERE ProductID = ?";
+        $stmt = mysqli_prepare($con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $quantityToRemove, $productID);
+        mysqli_stmt_execute($stmt);
+        header("Location: inventory.php?status=stock_removed");
+        exit();
+    }
+}
+// --- END: Handle Remove Stock ---
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,44 +104,13 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         html, body { overflow-x: hidden; }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            color: #0f172a;
-        }
-        .sidebar {
-            background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 240px;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-        .sidebar .nav-link {
-            color: #2d2d2d;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            margin: 0.25rem 0;
-            transition: all 0.3s ease;
-        }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: #2d2d2d;
-        }
-        .stats-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: 0 6px 18px rgba(15,23,42,0.06);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; color: #0f172a; }
+        .sidebar { background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%); min-height: 100vh; position: fixed; top: 0; left: 0; width: 240px; z-index: 1000; overflow-y: auto; }
+        .sidebar .nav-link { color: #2d2d2d; padding: 0.75rem 1rem; border-radius: 0.5rem; margin: 0.25rem 0; transition: all 0.3s ease; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.2); color: #2d2d2d; }
+        .stats-card { background: white; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 6px 18px rgba(15,23,42,0.06); transition: transform 0.25s ease, box-shadow 0.25s ease; }
         .stats-card:hover { transform: translateY(-5px); box-shadow: 0 12px 36px rgba(15,23,42,0.08); }
-        .main-content {
-            margin-left: 240px;
-            background-color: #f8f9fa;
-        }
+        .main-content { margin-left: 240px; background-color: #f8f9fa; }
         .navbar { background: white; box-shadow: 0 6px 18px rgba(15,23,42,0.06); padding:.6rem 1rem }
         .navbar .container-fluid h4.mb-0{ font-size:1.5rem; font-weight:800; }
         .table-container { background: white; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 6px 18px rgba(15,23,42,0.04); }
@@ -80,43 +118,14 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
         table { font-size:.95rem }
         thead th { font-weight:700; background-color: #f8f9fa; }
         .table tbody tr td, .table thead th { padding:.75rem .9rem; vertical-align:middle }
-        .stock-bar { height: 6px; border-radius: 3px; background-color: #e9ecef; }
-        .stock-bar .progress-bar { border-radius: 3px; }
         .admin-dropdown-item{ font-weight:700; font-size:0.95rem; color:#212529; display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.9rem }
         .dropdown-menu .admin-dropdown-item i{ width:20px; display:inline-flex; align-items:center; justify-content:center; }
-
-        /* --- NEW RESPONSIVE STYLES --- */
         @media (max-width: 991.98px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 240px;
-                height: 100%;
-                z-index: 1030;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                max-width: 100%;
-            }
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 1020;
-                display: none;
-            }
-            .sidebar-overlay.show {
-                display: block;
-            }
+            .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100%; z-index: 1030; transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; max-width: 100%; }
+            .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1020; display: none; }
+            .sidebar-overlay.show { display: block; }
         }
     </style>
 </head>
@@ -142,21 +151,17 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
                 </nav>
             </div>
             
-            <div class="col-md-9 col-lg-10 main-content p-4">
+            <main class="col-md-9 col-lg-10 main-content p-4">
                 <nav class="navbar navbar-expand-lg">
                     <div class="container-fluid">
-                        <button class="btn btn-outline-secondary d-lg-none me-3" type="button" id="sidebarToggle">
-                            <i class="bi bi-list"></i>
-                        </button>
+                        <button class="btn btn-outline-secondary d-lg-none me-3" type="button" id="sidebarToggle"><i class="bi bi-list"></i></button>
                         <h4 class="mb-0">Inventory Management</h4>
                         <div class="d-flex align-items-center">
-                             <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#addStockModal">
-                                <i class="bi bi-plus-circle me-2"></i>Add Stock
+                            <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#generalAdjustStockModal">
+                                <i class="bi bi-plus-circle me-2"></i>Adjust Stock
                             </button>
                             <div class="dropdown">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle me-2"></i>Admin
-                                </button>
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-person-circle me-2"></i>Admin</button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item admin-dropdown-item" href="settings.php"><i class="bi bi-gear"></i>Settings</a></li>
                                     <li><hr class="dropdown-divider"></li>
@@ -169,18 +174,10 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
 
                 <div class="p-4">
                      <div class="row g-4 mb-4">
-                        <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo count($inventory_items); ?></h5><small class="text-muted">Total Items</small></div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo count(array_filter($inventory_items, fn($item) => $item['status'] == 'In Stock')); ?></h5><small class="text-muted">In Stock</small></div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo count(array_filter($inventory_items, fn($item) => $item['status'] == 'Low Stock')); ?></h5><small class="text-muted">Low Stock</small></div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card"><h5>₹<?php echo number_format(array_sum(array_column($inventory_items, 'total_value'))); ?></h5><small class="text-muted">Total Value</small></div>
-                        </div>
+                        <div class="col-md-3"><div class="stats-card"><h5><?php $result = mysqli_query($con, "SELECT COUNT(ProductID) AS total FROM product"); echo mysqli_fetch_assoc($result)['total']; ?></h5><small class="text-muted">Total Products</small></div></div>
+                        <div class="col-md-3"><div class="stats-card"><h5><?php $result = mysqli_query($con, "SELECT SUM(Quantity) AS total FROM product"); echo number_format(mysqli_fetch_assoc($result)['total']); ?></h5><small class="text-muted">Total Units</small></div></div>
+                        <div class="col-md-3"><div class="stats-card"><h5><?php $result = mysqli_query($con, "SELECT COUNT(ProductID) AS total FROM product WHERE Quantity > 0 AND Quantity <= 5"); echo mysqli_fetch_assoc($result)['total']; ?></h5><small class="text-muted">Low Stock</small></div></div>
+                        <div class="col-md-3"><div class="stats-card"><h5>₹<?php $result = mysqli_query($con, "SELECT SUM(Price * Quantity) AS total FROM product"); echo number_format(mysqli_fetch_assoc($result)['total']); ?></h5><small class="text-muted">Total Inventory Value</small></div></div>
                     </div>
 
                     <div class="table-container">
@@ -188,132 +185,154 @@ $statuses = ['All', 'In Stock', 'Low Stock', 'Out of Stock'];
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Category</th>
-                                        <th>Stock Level</th>
-                                        <th>Status</th>
-                                        <th>Unit Cost</th>
-                                        <th>Actions</th>
-                                    </tr>
+                                    <tr><th>Product</th><th>Category</th><th>Quantity</th><th>Status</th><th>Unit Cost</th><th>Actions</th></tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach($inventory_items as $item): ?>
-                                    <tr>
-                                        <td>
-                                            <h6 class="mb-0 fw-bold"><?php echo $item['product_name']; ?></h6>
-                                            <small class="text-muted">ID: <?php echo $item['id']; ?></small>
-                                        </td>
-                                        <td><code><?php echo $item['sku']; ?></code></td>
-                                        <td><?php echo $item['category']; ?></td>
-                                        <td>
-                                            <?php $percentage = $item['max_stock'] > 0 ? ($item['current_stock'] / $item['max_stock']) * 100 : 0; ?>
-                                            <div class="d-flex align-items-center">
-                                                <div class="fw-bold me-2"><?php echo $item['current_stock']; ?></div>
-                                                <div class="progress flex-grow-1 stock-bar">
-                                                    <div class="progress-bar <?php 
-                                                        if ($percentage < ($item['min_stock'] / $item['max_stock'] * 100)) echo 'bg-danger';
-                                                        elseif ($percentage < 50) echo 'bg-warning';
-                                                        else echo 'bg-success';
-                                                    ?>" style="width: <?php echo $percentage; ?>%;"></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-<?php 
-                                                if ($item['status'] == 'In Stock') echo 'success';
-                                                elseif ($item['status'] == 'Low Stock') echo 'warning';
-                                                else echo 'danger';
-                                            ?>"><?php echo $item['status']; ?></span>
-                                        </td>
-                                        <td><strong>₹<?php echo number_format($item['unit_cost']); ?></strong></td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-success" onclick="addStock(<?php echo $item['id']; ?>)" title="Add Stock"><i class="bi bi-plus-circle"></i></button>
-                                                <button class="btn btn-sm btn-outline-primary" onclick="viewItem(<?php echo $item['id']; ?>)" title="View"><i class="bi bi-eye"></i></button>
-                                                <button class="btn btn-sm btn-outline-danger" onclick="removeStock(<?php echo $item['id']; ?>)" title="Remove Stock"><i class="bi bi-dash-circle"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
+                                    <?php
+                                        $sql="SELECT * FROM `product` ORDER BY `Name` ASC";
+                                        $result=mysqli_query($con,$sql);
+                                        if(mysqli_num_rows($result) > 0) {
+                                            while($row = mysqli_fetch_assoc($result)) {
+                                                $quantity = $row['Quantity'];
+                                                $stock_class = ($quantity > 5) ? 'success' : (($quantity > 0) ? 'warning' : 'danger');
+                                                $stock_text = ($quantity > 5) ? 'In Stock' : (($quantity > 0) ? 'Low Stock' : 'Out of Stock');
+
+                                                echo "<tr>
+                                                    <td>
+                                                        <h6 class='mb-0 fw-bold'>".htmlspecialchars($row['Name'])."</h6>
+                                                        <small class='text-muted'>ID: ".$row['ProductID']."</small>
+                                                    </td>
+                                                    <td>".htmlspecialchars($row['Category'])."</td>
+                                                    <td><div class='fw-bold'>".$quantity."</div></td>
+                                                    <td><span class='badge bg-".$stock_class."'>".$stock_text."</span></td>
+                                                    <td><strong>₹".number_format($row['Price'])."</strong></td>
+                                                    <td>
+                                                        <div class='btn-group'>
+                                                            <button class='btn btn-sm btn-outline-success' title='Add Stock' data-bs-toggle='modal' data-bs-target='#adjustStockModal' data-product-id='".$row['ProductID']."' data-product-name='".htmlspecialchars($row['Name'])."' data-action='add'><i class='bi bi-plus-circle'></i></button>
+                                                            <a href='products.php' class='btn btn-sm btn-outline-info' title='View/Edit Product'><i class='bi bi-eye'></i></a>
+                                                            <button class='btn btn-sm btn-outline-danger' title='Remove Stock' data-bs-toggle='modal' data-bs-target='#adjustStockModal' data-product-id='".$row['ProductID']."' data-product-name='".htmlspecialchars($row['Name'])."' data-action='remove'><i class='bi bi-dash-circle'></i></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='6'><div class='alert alert-warning mt-3' role='alert'>No Products Found!</div></td></tr>";
+                                        }
+                                    ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
     
-    <div class="modal fade" id="addStockModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="generalAdjustStockModal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Add Stock</h5>
+                    <h5 class="modal-title">Adjust Stock</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Product *</label>
-                                <select class="form-select" required>
-                                    <option value="">Select a product...</option>
-                                    <?php foreach($inventory_items as $item): ?>
-                                        <option value="<?php echo $item['id']; ?>"><?php echo $item['product_name']; ?> (SKU: <?php echo $item['sku']; ?>)</option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Quantity *</label>
-                                <input type="number" class="form-control" placeholder="e.g., 50" required>
-                            </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Select Product *</label>
+                            <select class="form-select" name="product_id_select" required>
+                                <option value="">Choose a product...</option>
+                                <?php
+                                    $sql_products = "SELECT `ProductID`, `Name` FROM `product` ORDER BY `Name` ASC";
+                                    $result_products = mysqli_query($con, $sql_products);
+                                    while($row_product = mysqli_fetch_assoc($result_products)) {
+                                        echo "<option value='".$row_product['ProductID']."'>".htmlspecialchars($row_product['Name'])." (ID: ".$row_product['ProductID'].")</option>";
+                                    }
+                                ?>
+                            </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control" rows="3" placeholder="Add any notes about this stock update..."></textarea>
+                            <label class="form-label">Quantity to Add *</label>
+                            <input type="number" class="form-control" name="quantity" min="1" required>
                         </div>
-                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="general_add_stock" class="btn btn-primary">Confirm Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="adjustStockModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adjustStockModalLabel">Adjust Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Add Stock</button>
-                </div>
+                <form method="POST" id="addStockForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="pid" id="addProductId"> 
+                        <div class="mb-3"><label class="form-label">Product</label><input type="text" class="form-control" id="addProductName" readonly></div>
+                        <div class="mb-3"><label for="addQuantity" class="form-label">Quantity to Add *</label><input type="number" class="form-control" name="qty1" id="addQuantity" min="1" required></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" name="save2" class="btn btn-primary">Confirm Add</button></div>
+                </form>
+                 <form method="POST" id="removeStockForm" style="display:none;">
+                    <div class="modal-body">
+                        <input type="hidden" name="pid2" id="removeProductId">
+                        <div class="mb-3"><label class="form-label">Product</label><input type="text" class="form-control" id="removeProductName" readonly></div>
+                        <div class="mb-3"><label for="removeQuantity" class="form-label">Quantity to Remove *</label><input type="number" class="form-control" name="qty2" id="removeQuantity" min="1" required></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" name="save3" class="btn btn-danger">Confirm Remove</button></div>
+                </form>
             </div>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
+    document.addEventListener('DOMContentLoaded', function () {
+        // Sidebar toggle script
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            const overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+            const closeSidebar = () => { sidebar.classList.remove('show'); overlay.classList.remove('show'); };
+            sidebarToggle.addEventListener('click', () => { sidebar.classList.toggle('show'); overlay.classList.toggle('show'); });
+            overlay.addEventListener('click', closeSidebar);
+        }
 
-            if (sidebarToggle) {
-                const overlay = document.createElement('div');
-                overlay.className = 'sidebar-overlay';
-                document.body.appendChild(overlay);
+        // SCRIPT FOR PER-ITEM ADJUST STOCK MODAL
+        const adjustStockModal = document.getElementById('adjustStockModal');
+        const modalLabel = document.getElementById('adjustStockModalLabel');
+        const addForm = document.getElementById('addStockForm');
+        const removeForm = document.getElementById('removeStockForm');
 
-                const closeSidebar = () => {
-                    sidebar.classList.remove('show');
-                    overlay.classList.remove('show');
-                };
+        adjustStockModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const productId = button.getAttribute('data-product-id');
+            const productName = button.getAttribute('data-product-name');
+            const action = button.getAttribute('data-action');
 
-                sidebarToggle.addEventListener('click', function () {
-                    sidebar.classList.toggle('show');
-                    overlay.classList.toggle('show');
-                });
-
-                overlay.addEventListener('click', closeSidebar);
+            if (action === 'add') {
+                modalLabel.textContent = 'Add Stock';
+                addForm.style.display = 'block';
+                removeForm.style.display = 'none';
+                document.getElementById('addProductId').value = productId;
+                document.getElementById('addProductName').value = productName;
+            } else if (action === 'remove') {
+                modalLabel.textContent = 'Remove Stock';
+                addForm.style.display = 'none';
+                removeForm.style.display = 'block';
+                document.getElementById('removeProductId').value = productId;
+                document.getElementById('removeProductName').value = productName;
             }
         });
-    </script>
-    <script>
-        function viewItem(itemId) { alert('View inventory details for item ID: ' + itemId); }
-        function addStock(itemId) { alert('Add stock for item ID: ' + itemId); }
-        function removeStock(itemId) { alert('Remove stock for item ID: ' + itemId); }
+    });
     </script>
 </body>
 </html>

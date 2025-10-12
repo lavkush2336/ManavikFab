@@ -2,9 +2,9 @@
 session_start();
 include '../connection.php';
 
-if (!isset($_SESSION['admin_id'])) {
-    // header("Location: login.php");
-    // exit();
+if (!isset($_SESSION['adminid'])) {
+    header("Location: login.php");
+    exit();
 }
 
 $general_settings = ['site_name' => 'ManavikFab', 'site_description' => 'Premium Fashion for Women', 'site_email' => 'info@manavikfab.com', 'site_phone' => '+91 98765 43210'];

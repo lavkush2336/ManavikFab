@@ -2,6 +2,6 @@
 	$server='localhost';
 	$user='root';
 	$pw='';
-	$db='ManavikFab';
+	$db='manavikfab';
 	$con=mysqli_connect($server,$user,$pw,$db);
 ?>

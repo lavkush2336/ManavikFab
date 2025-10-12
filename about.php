@@ -198,9 +198,9 @@ include 'connection.php';
                 <div class="col-md-6">
                     <p class="mb-0 text-muted">&copy; 2024 ManavikFab. All rights reserved.</p>
                 </div>
-                <div class="col-md-6 text-md-end">
+                <!-- <div class="col-md-6 text-md-end">
                     <img src="images/payment-methods.png" alt="Payment Methods" class="img-fluid" style="height: 30px;">
-                </div>
+                </div> -->
             </div>
         </div>
     </footer>

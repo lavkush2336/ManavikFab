@@ -3,9 +3,9 @@
 include '../connection.php';
 
 // Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    // header("Location: login.php");
-    // exit();
+if (!isset($_SESSION['adminid'])) {
+    header("Location: login.php");
+    exit();
 }
 
 // Sample admin dashboard data

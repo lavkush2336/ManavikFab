@@ -3,23 +3,10 @@ session_start();
 include '../connection.php';
 
 // Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    // header("Location: login.php");
-    // exit();
+if (!isset($_SESSION['adminid'])) {
+    header("Location: login.php");
+    exit();
 }
-
-// Sample customers data
-$customers = [
-    ['id' => 1, 'name' => 'Priya Sharma', 'email' => 'priya.sharma@email.com', 'phone' => '+91 98765 43210', 'join_date' => '2023-12-01', 'total_orders' => 8, 'total_spent' => 18999, 'last_order' => '2024-01-15', 'status' => 'Active', 'city' => 'New Delhi', 'state' => 'Delhi'],
-    ['id' => 2, 'name' => 'Anjali Patel', 'email' => 'anjali.patel@email.com', 'phone' => '+91 87654 32109', 'join_date' => '2023-11-15', 'total_orders' => 5, 'total_spent' => 12499, 'last_order' => '2024-01-14', 'status' => 'Active', 'city' => 'Gurgaon', 'state' => 'Haryana'],
-    ['id' => 3, 'name' => 'Meera Singh', 'email' => 'meera.singh@email.com', 'phone' => '+91 76543 21098', 'join_date' => '2023-10-20', 'total_orders' => 12, 'total_spent' => 28999, 'last_order' => '2024-01-13', 'status' => 'Active', 'city' => 'Mumbai', 'state' => 'Maharashtra'],
-    ['id' => 4, 'name' => 'Kavya Reddy', 'email' => 'kavya.reddy@email.com', 'phone' => '+91 65432 10987', 'join_date' => '2023-09-10', 'total_orders' => 3, 'total_spent' => 5999, 'last_order' => '2024-01-12', 'status' => 'Inactive', 'city' => 'Bangalore', 'state' => 'Karnataka'],
-    ['id' => 5, 'name' => 'Riya Gupta', 'email' => 'riya.gupta@email.com', 'phone' => '+91 54321 09876', 'join_date' => '2023-08-25', 'total_orders' => 15, 'total_spent' => 35999, 'last_order' => '2024-01-11', 'status' => 'Active', 'city' => 'Kolkata', 'state' => 'West Bengal'],
-    ['id' => 6, 'name' => 'Zara Khan', 'email' => 'zara.khan@email.com', 'phone' => '+91 43210 98765', 'join_date' => '2024-01-05', 'total_orders' => 1, 'total_spent' => 2499, 'last_order' => '2024-01-10', 'status' => 'Active', 'city' => 'Hyderabad', 'state' => 'Telangana']
-];
-
-$statuses = ['All', 'Active', 'Inactive'];
-$cities = ['All', 'New Delhi', 'Gurgaon', 'Mumbai', 'Bangalore', 'Kolkata', 'Hyderabad'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -173,16 +160,21 @@ $cities = ['All', 'New Delhi', 'Gurgaon', 'Mumbai', 'Bangalore', 'Kolkata', 'Hyd
                 <div class="p-4">
                     <div class="row g-4 mb-4">
                         <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo count($customers); ?></h5><small class="text-muted">Total Customers</small></div>
+                            <div class="stats-card"><h5><?php
+                            $sql="SELECT `UserID` FROM `User`";
+                            $result=mysqli_query($con,$sql);
+                            $rows=mysqli_num_rows($result);
+                            echo $rows;
+                        ?></h5><small class="text-muted">Total Customers</small></div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo count(array_filter($customers, function($c) { return $c['status'] == 'Active'; })); ?></h5><small class="text-muted">Active Customers</small></div>
+                            <div class="stats-card"><h5><?php echo $rows;?></h5><small class="text-muted">Active Customers</small></div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stats-card"><h5>₹<?php echo number_format(array_sum(array_column($customers, 'total_spent'))); ?></h5><small class="text-muted">Total Revenue</small></div>
+                            <div class="stats-card"><h5>₹0</h5><small class="text-muted">Total Revenue</small></div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stats-card"><h5><?php echo array_sum(array_column($customers, 'total_orders')); ?></h5><small class="text-muted">Total Orders</small></div>
+                            <div class="stats-card"><h5>0</h5><small class="text-muted">Total Orders</small></div>
                         </div>
                     </div>
                     
@@ -192,9 +184,10 @@ $cities = ['All', 'New Delhi', 'Gurgaon', 'Mumbai', 'Bangalore', 'Kolkata', 'Hyd
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
+                                        <th>ID</th>
                                         <th>Customer</th>
                                         <th>Contact</th>
-                                        <th>Location</th>
+                                        <th>Age</th>
                                         <th>Join Date</th>
                                         <th>Orders</th>
                                         <th>Total Spent</th>
@@ -203,39 +196,61 @@ $cities = ['All', 'New Delhi', 'Gurgaon', 'Mumbai', 'Bangalore', 'Kolkata', 'Hyd
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach($customers as $customer): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="customer-avatar me-3"><?php echo strtoupper(substr($customer['name'], 0, 1)); ?></div>
-                                                <div>
-                                                    <h6 class="mb-0 fw-bold"><?php echo $customer['name']; ?></h6>
-                                                    <small class="text-muted">ID: <?php echo $customer['id']; ?></small>
-                                                </div>
-                                            </div>
-                                        </td>
+                                        <?PHP
+                                            $sql="SELECT * FROM `User`";
+                                            $result=mysqli_query($con,$sql);
+                                            $rows=mysqli_num_rows($result);
+                                            if($rows>0)
+                                            {
+                                                while($row=mysqli_fetch_assoc($result))
+                                                {
+                                                    $dob_string = $row['DOB'];
+                                                    $dob=new DateTime($dob_string);
+                                                    $now = new DateTime();
+                                                    $interval = $now->diff($dob);
+                                                    $age=$interval->y;
+                                                    $status=$row['Verified'];
+                                                    $c=($row['Verified'] == 1 ? 'success' : 'secondary');
+                                                    if($status==1)
+                                                    {
+                                                        $status="Verified";
+                                                    }
+                                                    else
+                                                    {
+                                                        $status="Not-Verified";
+                                                    }
+                                                    echo "<tr><td>".$row['UserID']."</td>
+                                        <td>".$row['Name']."</td>
                                         <td>
                                             <div>
-                                                <div class="mb-1"><?php echo $customer['email']; ?></div>
-                                                <small class="text-muted"><?php echo $customer['phone']; ?></small>
+                                                <div class='mb-1'>".$row['Email']."</div>
+                                                <small class='text-muted'>".$row['Phone']."</small>
                                             </div>
                                         </td>
-                                        <td><?php echo $customer['city']; ?>, <?php echo $customer['state']; ?></td>
-                                        <td><?php echo date('M d, Y', strtotime($customer['join_date'])); ?></td>
-                                        <td><?php echo $customer['total_orders']; ?></td>
-                                        <td><strong>₹<?php echo number_format($customer['total_spent']); ?></strong></td>
+                                        <td>".$age."</td>
+                                        <td>".$row['Date']."</td>
+                                        <td>0</td>
+                                        <td><strong>₹0</strong></td>
                                         <td>
-                                            <span class="badge bg-<?php echo strtolower($customer['status']) == 'active' ? 'success' : 'secondary'; ?>">
-                                                <?php echo $customer['status']; ?>
+                                            <span class='badge bg-".$c."'>
+                                                ".$status."
                                             </span>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-warning" onclick="sendEmail(<?php echo $customer['id']; ?>)" title="Send Email">
-                                                <i class="bi bi-envelope"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
+                                            <a href='mailto:".$row['Email']."' class='btn btn-sm btn-outline-warning' title='Send Email'>
+                                                <i class='bi bi-envelope'></i>
+                                            </a>
+                                        </td>";
+                                                }
+                                                echo "</tr>";
+                                            }
+                                            else
+                                            {
+                                                echo "<td colspan='8'><div class='alert alert-warning mt-3' role='alert'>No Users Found!</div></td>";
+                                            }
+                                        ?>
+                                        
+                                    
                                 </tbody>
                             </table>
                         </div>
