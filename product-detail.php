@@ -479,16 +479,38 @@ $related_products = [
         <div class="row">
             <div class="col-lg-6 mb-4">
                 <div class="product-gallery">
-                    <div class="mb-3">
-                        <img src="<?php echo $product['images'][0]; ?>" class="img-fluid rounded" id="mainImage" alt="<?php echo $product['name']; ?>">
-                    </div>
-                    <div class="row g-2">
-                        <?php foreach($product['images'] as $index => $image): ?>
-                        <div class="col-3">
-                            <img src="<?php echo $image; ?>" class="img-fluid rounded thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" 
-                                 onclick="changeImage(this, '<?php echo $image; ?>')" alt="Product Image <?php echo $index + 1; ?>">
+                    <div id="productCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="images/product_1760297195_1.png" class="d-block w-100 rounded" alt="Product Image 1">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="images/product_1760296843_3.png" class="d-block w-100 rounded" alt="Product Image 2">
+                            </div>
+                              <div class="carousel-item">
+                                <img src="images/product_1760296843_4.png" class="d-block w-100 rounded" alt="Product Image 2">
+                            </div>
+                              <div class="carousel-item">
+                                <img src="images/product_1760297261_1.png" class="d-block w-100 rounded" alt="Product Image 2">
+                            </div>
                         </div>
-                        <?php endforeach; ?>
+
+                        <div class="carousel-indicators">
+                            <?php foreach($product['images'] as $index => $image): ?>
+                            <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="<?php echo $index; ?>" 
+                                    class="<?php echo $index === 0 ? 'active' : ''; ?>" aria-current="true" aria-label="Slide <?php echo $index + 1; ?>">
+                            </button>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -673,7 +695,7 @@ $related_products = [
                     <?php foreach($related_products as $related): ?>
                     <div class="col-md-4">
                         <div class="card product-card h-100">
-                            <img src="<?php echo $related['image']; ?>" class="card-img-top" alt="<?php echo $related['name']; ?>">
+                            <img src="product_1760297261_1.jpg" class="card-img-top" alt="<?php echo $related['name']; ?>">
                             <div class="card-body">
                                 <h6 class="card-title"><?php echo $related['name']; ?></h6>
                                 <div class="d-flex align-items-center mb-2">
@@ -771,11 +793,8 @@ $related_products = [
         });
 
         // Product detail page specific JS
-        function changeImage(thumbnail, imageSrc) {
-            document.getElementById('mainImage').src = imageSrc;
-            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-            thumbnail.classList.add('active');
-        }
+        // The original changeImage function is no longer needed with the carousel
+        // and has been removed to avoid confusion.
 
         function selectColor(colorOption) {
             document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
