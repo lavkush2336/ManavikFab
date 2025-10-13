@@ -2,41 +2,46 @@
 session_start();
 include 'connection.php';
 
-$product_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
+if(isset($_GET['product']))
+{
+    $id=$_GET['product'];
+    $sql="SELECT * FROM `product` WHERE `ProductID`='$id'";
+    $result=mysqli_query($con,$sql);
+    $rows=mysqli_num_rows($result);
+    if($rows>0)
+    {
+        $row=mysqli_fetch_assoc($result);
+        $name=$row['Name'];
+        $cat=$row['Category'];
+        $brand=$row['Brand'];
+        $sprice=$row['SPrice'];
+        $price=$row['Price'];
+        $qty=$row['Quantity'];
+        $color=$row['Colour'];
+        $size=$row['Size'];
+        $desc=$row['Description'];
+        $img1=$row['img1'];
+        $img2=$row['img2'];
+        $img3=$row['img3'];
+        $img4=$row['img4'];
+        $img5=$row['img5'];
+    }
+    else
+    {
+        header('Location: index.php');
+        exit();
+    }
 
-// Sample product data
-$product = [
-    'id' => $product_id,
-    'name' => 'Embroidered Silk Saree',
-    'category' => 'sarees',
-    'price' => 2499,
-    'original_price' => 3999,
-    'discount' => 37,
-    'rating' => 4.5,
-    'reviews' => 128,
-    'description' => 'This beautiful embroidered silk saree features intricate handwork and premium silk fabric. Perfect for weddings, festivals, and special occasions. The saree comes with a matching blouse piece and is available in multiple sizes.',
-    'features' => [
-        'Premium Silk Fabric',
-        'Hand Embroidered',
-        'Matching Blouse Piece',
-        'Multiple Size Options',
-        'Dry Clean Only'
-    ],
-    'sizes' => ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    'colors' => [
-        ['name' => 'Red', 'code' => '#dc3545'],
-        ['name' => 'Blue', 'code' => '#0d6efd'],
-        ['name' => 'Green', 'code' => '#198754'],
-        ['name' => 'Pink', 'code' => '#e83e8c']
-    ],
-    'images' => [
-        'images/product1.jpg',
-        'images/product1-2.jpg',
-        'images/product1-3.jpg',
-        'images/product1-4.jpg'
-    ],
-    'stock' => 15
-];
+if(isset($_POST['cart']))
+{
+    $qty1=$_POST['qty'];
+    if($size!="Free Size"){
+    if(isset($_GET['size']))
+    {
+        $size=$_GET['size'];
+    }}
+    echo "<script>alert('Quantity: ".$qty1."')</script>";
+}
 
 $related_products = [
     [
@@ -482,25 +487,53 @@ $related_products = [
                     <div id="productCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                         <div class="carousel-inner">
                             <div class="carousel-item active">
-                                <img src="images/product_1760297195_1.png" class="d-block w-100 rounded" alt="Product Image 1">
+                                <img src="images/<?PHP echo $img1;?>" class="d-block w-100 rounded">
                             </div>
-                            <div class="carousel-item">
-                                <img src="images/product_1760296843_3.png" class="d-block w-100 rounded" alt="Product Image 2">
-                            </div>
-                              <div class="carousel-item">
-                                <img src="images/product_1760296843_4.png" class="d-block w-100 rounded" alt="Product Image 2">
-                            </div>
-                              <div class="carousel-item">
-                                <img src="images/product_1760297261_1.png" class="d-block w-100 rounded" alt="Product Image 2">
-                            </div>
+                            <?PHP
+                                // Keep track of the number of valid images to generate indicators
+                                $image_count = 1;
+
+                                if($img2!="")
+                                {
+                                    echo "<div class='carousel-item'>
+                                <img src='images/".$img2."' class='d-block w-100 rounded'>
+                            </div>";
+                                    $image_count++;
+                                }
+                                if($img3!="")
+                                {
+                                    echo "<div class='carousel-item'>
+                                <img src='images/".$img3."' class='d-block w-100 rounded'>
+                            </div>";
+                                    $image_count++;
+                                }
+                                if($img4!="")
+                                {
+                                    echo "<div class='carousel-item'>
+                                <img src='images/".$img4."' class='d-block w-100 rounded'>
+                            </div>";
+                                    $image_count++;
+                                }
+                                if($img5!="")
+                                {
+                                    echo "<div class='carousel-item'>
+                                <img src='images/".$img5."' class='d-block w-100 rounded'>
+                            </div>";
+                                    $image_count++;
+                                }
+                            ?>
                         </div>
 
                         <div class="carousel-indicators">
-                            <?php foreach($product['images'] as $index => $image): ?>
-                            <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="<?php echo $index; ?>" 
-                                    class="<?php echo $index === 0 ? 'active' : ''; ?>" aria-current="true" aria-label="Slide <?php echo $index + 1; ?>">
+                            <?php 
+                            // FIX: The original code used a non-existent $product['images']
+                            // This loop now iterates over the known number of available images ($image_count)
+                            for($i = 0; $i < $image_count; $i++): 
+                            ?>
+                            <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="<?php echo $i; ?>" 
+                                    class="<?php echo $i === 0 ? 'active' : ''; ?>" aria-current="true" aria-label="Slide <?php echo $i + 1; ?>">
                             </button>
-                            <?php endforeach; ?>
+                            <?php endfor; ?>
                         </div>
                         
                         <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
@@ -517,75 +550,101 @@ $related_products = [
 
             <div class="col-lg-6">
                 <div class="product-info">
-                    <h2 class="mb-3"><?php echo $product['name']; ?></h2>
+                    <h2 class="mb-3"><?php echo $name; ?></h2>
                     
                     <div class="d-flex align-items-center mb-3">
-                        <div class="text-warning me-2">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <i class="bi bi-star<?php echo $i <= $product['rating'] ? '-fill' : ''; ?>"></i>
-                            <?php endfor; ?>
+                        <div class="text-secondary me-2">
+                            <?PHP echo $brand;?>
                         </div>
-                        <span class="me-3"><?php echo $product['rating']; ?></span>
-                        <span class="text-muted">(<?php echo $product['reviews']; ?> reviews)</span>
                     </div>
 
                     <div class="mb-4">
-                        <span class="h3 text-danger fw-bold">₹<?php echo number_format($product['price']); ?></span>
-                        <span class="h5 text-muted text-decoration-line-through ms-2">₹<?php echo number_format($product['original_price']); ?></span>
-                        <span class="badge bg-danger ms-2"><?php echo $product['discount']; ?>% OFF</span>
+                        <span class="h3 text-danger fw-bold">₹<?php echo number_format($price); ?></span>
+                        <span class="h5 text-muted text-decoration-line-through ms-2">₹<?php echo number_format($sprice); ?></span>
+                        <span class="badge bg-danger ms-2"><?php $per=(($sprice-$price)/$sprice)*100; echo round($per);?>% OFF</span>
                     </div>
 
-                    <p class="text-muted mb-4"><?php echo $product['description']; ?></p>
+                    <p class="text-muted mb-4"><?php echo $desc; ?></p>
 
                     <div class="mb-4">
                         <h6>Color:</h6>
                         <div class="d-flex gap-2">
-                            <?php foreach($product['colors'] as $color): ?>
-                            <div class="color-option" style="background-color: <?php echo $color['code']; ?>" 
-                                 title="<?php echo $color['name']; ?>" onclick="selectColor(this)"></div>
-                            <?php endforeach; ?>
+                            <div class="color-option" style="background-color: <?PHP echo $color;?>;" 
+                                 title="No Colour Option Available." onclick="selectColor(this)"></div>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <h6>Size:</h6>
                         <div class="d-flex gap-2 flex-wrap">
-                            <?php foreach($product['sizes'] as $size): ?>
-                            <button class="btn size-btn" onclick="selectSize(this)"><?php echo $size; ?></button>
-                            <?php endforeach; ?>
+                            <?PHP
+                                if($size=="Free Size")
+                                {
+                                    echo "<button class='btn size-btn btn-outline-dark' onclick='selectSize(this)'>Free Size</button>";
+                                }
+                                else
+                                {
+                                    // --- START: MODIFIED CODE FOR SIZE SELECTION ---
+                                    $current_uri = $_SERVER['REQUEST_URI'];
+                                    $available_sizes = ['s', 'm', 'l', 'xl', 'xxl'];
+
+                                    // 1. Parse the current URL components
+                                    $url_components = parse_url($current_uri);
+
+                                    // 2. Extract existing query parameters
+                                    $existing_params = [];
+                                    if (isset($url_components['query'])) {
+                                        parse_str($url_components['query'], $existing_params);
+                                    }
+                                    
+                                    // Get the currently selected size from the URL for styling
+                                    $selected_size = $_GET['size'] ?? '';
+
+                                    // 3. Keep the path part (everything before '?')
+                                    $path = $url_components['path'] ?? basename($_SERVER['PHP_SELF']);
+
+                                    // 4. Generate the size links
+                                    foreach ($available_sizes as $s) {
+                                        // Merge existing params, overwriting 'size'
+                                        $new_params = array_merge($existing_params, ['size' => $s]);
+
+                                        // Build the new query string
+                                        $new_query_string = http_build_query($new_params);
+
+                                        // Construct the final clean URL
+                                        $final_url = $path . '?' . $new_query_string;
+
+                                        // Determine active class
+                                        $is_active = ($selected_size === $s) ? 'active' : '';
+
+                                        // Output the anchor tag
+                                        echo "<a href='{$final_url}' class='btn size-btn btn-outline-dark {$is_active}' onclick='selectSize(this)'>" . strtoupper($s) . "</a>\n";
+                                    }
+                                    // --- END: MODIFIED CODE FOR SIZE SELECTION ---
+                                }
+                            ?>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <h6>Quantity:</h6>
                         <div class="d-flex align-items-center">
-                            <button class="btn btn-outline-secondary" onclick="changeQuantity(-1)">-</button>
-                            <input type="number" class="form-control mx-2" value="1" min="1" max="<?php echo $product['stock']; ?>" id="quantity" style="width: 80px;">
-                            <button class="btn btn-outline-secondary" onclick="changeQuantity(1)">+</button>
-                            <span class="text-muted ms-2"><?php echo $product['stock']; ?> available</span>
-                        </div>
+                            <form method="POST">
+                            <input type="number" class="form-control mx-2 text-center" value="1" min="1" max="<?php echo $qty; ?>" id="quantity" style="width: 80px;" name="qty">
+                            </div>
                     </div>
 
-                    <div class="d-flex gap-3 mb-4">
-                        <button class="btn btn-primary-custom flex-fill">
+                    <div class="d-flex gap-3 mb-4 mb-5">
+                        <button class="btn btn-primary-custom flex-fill" type="submit" name="cart">
                             <i class="bi bi-cart-plus me-2"></i>Add to Cart
                         </button>
-                        <button class="btn btn-outline-danger">
+                        <button class="btn btn-outline-danger" name="wish">
                             <i class="bi bi-heart"></i>
-                        </button>
+                        </button></form>
                     </div>
 
-                    <div class="mb-4">
-                        <h6>Features:</h6>
-                        <ul class="list-unstyled">
-                            <?php foreach($product['features'] as $feature): ?>
-                            <li><i class="bi bi-check-circle text-success me-2"></i><?php echo $feature; ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-
-                    <div class="border-top pt-3">
-                        <div class="row text-center">
+                    <div class="border-top pt-3 mb-3">
+                        <div class="row text-center mt-3">
                             <div class="col-4">
                                 <i class="bi bi-truck text-primary"></i>
                                 <small class="d-block">Free Shipping</small>
@@ -612,9 +671,6 @@ $related_products = [
                             <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">Description</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">Reviews</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
                             <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab">Shipping</button>
                         </li>
                     </ul>
@@ -622,53 +678,8 @@ $related_products = [
                         <div class="tab-pane fade show active" id="description" role="tabpanel">
                             <div class="p-3">
                                 <h5>Product Description</h5>
-                                <p><?php echo $product['description']; ?></p>
-                                <p>This beautiful saree is crafted with premium silk fabric and features intricate hand embroidery work. The design is perfect for weddings, festivals, and special occasions. The saree comes with a matching blouse piece and is available in multiple sizes to ensure the perfect fit.</p>
+                                <p><?php echo $desc; ?></p>
                                 <p>Care Instructions: Dry clean only. Store in a cool, dry place away from direct sunlight.</p>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="reviews" role="tabpanel">
-                            <div class="p-3">
-                                <h5>Customer Reviews</h5>
-                                <div class="row">
-                                    <div class="col-md-4 text-center">
-                                        <h2 class="text-warning"><?php echo $product['rating']; ?></h2>
-                                        <div class="text-warning mb-2">
-                                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                                <i class="bi bi-star<?php echo $i <= $product['rating'] ? '-fill' : ''; ?>"></i>
-                                            <?php endfor; ?>
-                                        </div>
-                                        <p class="text-muted"><?php echo $product['reviews']; ?> reviews</p>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="border-bottom pb-3 mb-3">
-                                            <div class="d-flex justify-content-between">
-                                                <h6>Priya Sharma</h6>
-                                                <div class="text-warning">
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                </div>
-                                            </div>
-                                            <p class="text-muted">Beautiful saree! The embroidery work is exquisite and the fabric quality is excellent.</p>
-                                        </div>
-                                        <div class="border-bottom pb-3 mb-3">
-                                            <div class="d-flex justify-content-between">
-                                                <h6>Anjali Patel</h6>
-                                                <div class="text-warning">
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star-fill"></i>
-                                                    <i class="bi bi-star"></i>
-                                                </div>
-                                            </div>
-                                            <p class="text-muted">Great product, fast delivery. The color is exactly as shown in the picture.</p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="shipping" role="tabpanel">
@@ -801,20 +812,49 @@ $related_products = [
             colorOption.classList.add('active');
         }
 
+        // Note: The selectSize(sizeBtn) function will be mainly used for visual feedback.
+        // The PHP logic is responsible for changing the URL parameter.
         function selectSize(sizeBtn) {
             document.querySelectorAll('.size-btn').forEach(s => s.classList.remove('active'));
             sizeBtn.classList.add('active');
         }
+        
+        // Add active class on page load based on URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sizeParam = urlParams.get('size');
+            if (sizeParam) {
+                document.querySelectorAll('.size-btn').forEach(btn => {
+                    if (btn.textContent.trim().toLowerCase() === sizeParam) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        });
+
 
         function changeQuantity(delta) {
             const quantityInput = document.getElementById('quantity');
             let currentValue = parseInt(quantityInput.value);
             let newValue = currentValue + delta;
             
-            if (newValue >= 1 && newValue <= <?php echo $product['stock']; ?>) {
+            // Note: $product['stock'] is not defined in the PHP code. 
+            // It should use $qty instead, which is fetched from the database.
+            // Assuming $qty is a valid number:
+            const maxStock = parseInt(quantityInput.getAttribute('max')); 
+
+            if (newValue >= 1 && newValue <= maxStock) {
                 quantityInput.value = newValue;
             }
         }
     </script>
 </body>
 </html>
+<?PHP
+    }
+    else
+    {
+        header('Location: index.php');
+        exit();
+    }
+?>

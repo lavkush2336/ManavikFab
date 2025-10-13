@@ -1,11 +1,40 @@
 <?php
     session_start();
     include 'connection.php';
+    function getUserIP()
+    {
+        if (isset($_SERVER['HTTP_CLIENT_IP']) && filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP)) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    }
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // HTTP_X_FORWARDED_FOR can contain a list of IPs.
+        // The first IP is generally the most accurate client IP.
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $firstIp = trim($ipList[0]);
 
-    // Check for the "Remember Me" cookie
-    $remembered_email = "";
-    if (isset($_COOKIE['remember_user_email'])) {
-        $remembered_email = $_COOKIE['remember_user_email'];
+        if (filter_var($firstIp, FILTER_VALIDATE_IP)) {
+            return $firstIp;
+        }
+    }
+    if (isset($_SERVER['REMOTE_ADDR']) && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+    // Return a default if no IP could be determined (should be rare)
+    return 'IP not found';
+    }
+    $user_ip = getUserIP();
+    $remember=0;
+    $sql="SELECT `Email`,`Remember`,`IP` FROM `User` WHERE `IP`='$user_ip'";
+    $result=mysqli_query($con,$sql);
+    $rows=mysqli_num_rows($result);
+    if($rows>0)
+    {
+        while($row=mysqli_fetch_assoc($result))
+        {
+            $email=$row['Email'];
+            $remember=$row['Remember'];
+            $ip=$row['IP'];
+        }
     }
 ?>
 <!DOCTYPE html>
@@ -185,7 +214,16 @@
             <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="login-form">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="you@domain.com" value="<?php echo htmlspecialchars($remembered_email); ?>" required>
+                    <?PHP
+                        if($remember==1 && $user_ip==$ip)
+                        {
+                            echo "<input type='email' id='email' name='email' class='form-control' placeholder='you@domain.com' value='".$email."' required>";
+                        }
+                        else
+                        {
+                            echo "<input type='email' id='email' name='email' class='form-control' placeholder='you@domain.com' required>";
+                        }
+                    ?>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
@@ -193,7 +231,16 @@
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo !empty($remembered_email) ? 'checked' : ''; ?>>
+                        <?PHP
+                            if($remember==1 && $user_ip==$ip)
+                            {
+                                echo "<input class='form-check-input' type='checkbox' id='remember' name='remember' checked>";
+                            }
+                            else
+                            {
+                                echo "<input class='form-check-input' type='checkbox' id='remember' name='remember'>";
+                            }
+                        ?>
                         <label class="form-check-label" for="remember">Remember me</label>
                     </div>
                 </div>
@@ -209,22 +256,36 @@
                     $email = $_POST['email'];
                     $pass = $_POST['pass'];
 
-                    $stmt = mysqli_prepare($con, "SELECT UserID, Name, Password FROM `User` WHERE `Email` = ?");
+                    $stmt = mysqli_prepare($con, "SELECT UserID, Name, Password, Verified FROM `User` WHERE `Email` = ?");
                     mysqli_stmt_bind_param($stmt, "s", $email);
                     mysqli_stmt_execute($stmt);
                     $result = mysqli_stmt_get_result($stmt);
 
                     if (mysqli_num_rows($result) > 0) {
                         $row = mysqli_fetch_assoc($result);
+                        $id=$row['UserID'];
+                        if(isset($_POST['remember']))
+                        {
+                            $sql="UPDATE `User` SET `Remember`='1' WHERE `UserID`='$id'";
+                            $result=mysqli_query($con,$sql);
+                        }
+                        else
+                        {
+                            $sql="UPDATE `User` SET `Remember`='0' WHERE `UserID`='$id'";
+                            $result=mysqli_query($con,$sql);
+                        }
+                        if($row['Verified']==0)
+                        {
+                            $potp = rand(100000, 999999);
+                            $eotp = rand(100000, 999999);
+                            $_SESSION['potp'] = $potp;
+                            $_SESSION['eotp'] = $eotp;
+                            $sql="UPDATE `User` SET `eotp`='$eotp',`potp`='$potp' WHERE `UserID`='$id";
+                            $result=mysqli_query($con,$sql);
+                            echo "<script>alert(User Not Vrifed, Verify EmailID & Phone Number!)</script>";
+                            echo "<script>window.open('verify.php','_self')</script>";
+                        }
                         if (password_verify($pass, $row['Password'])) {
-                            if (!empty($_POST['remember'])) {
-                                setcookie("remember_user_email", $email, time() + (86400 * 30), "/");
-                            } else {
-                                if (isset($_COOKIE['remember_user_email'])) {
-                                    setcookie("remember_user_email", "", time() - 3600, "/");
-                                }
-                            }
-                            
                             $_SESSION['userid'] = $row['UserID'];
                             $_SESSION['name'] = $row['Name'];
                             $_SESSION['email'] = $email;

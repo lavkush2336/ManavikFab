@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 12, 2025 at 10:53 PM
+-- Generation Time: Oct 13, 2025 at 08:02 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -57,7 +57,7 @@ CREATE TABLE `brand` (
 --
 
 INSERT INTO `brand` (`BrandID`, `Name`, `Logo`) VALUES
-(1, 'ManavikFab', '1760284976_brand_image1.png');
+(1, 'ManavikFab', '1760367102_brand_image1.png');
 
 -- --------------------------------------------------------
 
@@ -92,9 +92,12 @@ CREATE TABLE `product` (
   `Name` varchar(150) NOT NULL,
   `Category` varchar(50) NOT NULL,
   `Brand` varchar(50) NOT NULL,
+  `SPrice` int(10) NOT NULL,
   `Price` int(10) NOT NULL,
   `Quantity` int(10) NOT NULL,
   `Description` varchar(500) NOT NULL,
+  `Colour` varchar(10) NOT NULL,
+  `Size` varchar(10) NOT NULL,
   `img1` varchar(255) NOT NULL,
   `img2` varchar(255) DEFAULT NULL,
   `img3` varchar(255) DEFAULT NULL,
@@ -106,8 +109,8 @@ CREATE TABLE `product` (
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`ProductID`, `Name`, `Category`, `Brand`, `Price`, `Quantity`, `Description`, `img1`, `img2`, `img3`, `img4`, `img5`) VALUES
-(1, 'Women Embroidered Stole', 'Stalls', 'ManavikFab', 1120, 0, 'This Elegant Viscose Rayon Stole offers a luxurious feel and a beautiful drape, perfect for elevating any ensemble. Crafted entirely from high-quality Viscose Rayon, it features a stylish tasselled border for a sophisticated finish. Due to its generous size (71.12m x 2.032m), it provides exceptional versatility for layering. To maintain its superior quality, this embroidered accessory requires Dry Clean only.', 'product_1760297195_1.jpg', 'product_1760296843_2.webp', 'product_1760296843_3.webp', 'product_1760296843_4.webp', 'product_1760296843_5.webp');
+INSERT INTO `product` (`ProductID`, `Name`, `Category`, `Brand`, `SPrice`, `Price`, `Quantity`, `Description`, `Colour`, `Size`, `img1`, `img2`, `img3`, `img4`, `img5`) VALUES
+(1, 'Women Ethnic Motifs Embroidered Stole', 'Stalls', 'ManavikFab', 1695, 1120, 50, 'This Elegant Viscose Rayon Stole offers a luxurious feel and a beautiful drape, perfect for elevating any ensemble. Crafted entirely from high-quality Viscose Rayon, it features a stylish tasselled border for a sophisticated finish. Due to its generous size (71.12m x 2.032m), it provides exceptional versatility for layering. To maintain its superior quality, this embroidered accessory requires Dry Clean only.', 'Maroon', 'All Sizes', 'product_1760367244_1.png', 'product_1760367244_2.png', 'product_1760367244_3.png', 'product_1760367244_4.png', '');
 
 -- --------------------------------------------------------
 
@@ -123,6 +126,8 @@ CREATE TABLE `User` (
   `DOB` varchar(10) NOT NULL,
   `Password` varchar(1000) NOT NULL,
   `Date` varchar(10) DEFAULT NULL,
+  `IP` varchar(255) NOT NULL,
+  `Remember` int(1) NOT NULL,
   `Verified` int(1) NOT NULL,
   `eotp` int(10) DEFAULT NULL,
   `potp` int(10) DEFAULT NULL
@@ -132,9 +137,11 @@ CREATE TABLE `User` (
 -- Dumping data for table `User`
 --
 
-INSERT INTO `User` (`UserID`, `Name`, `Email`, `Phone`, `DOB`, `Password`, `Date`, `Verified`, `eotp`, `potp`) VALUES
-(1, 'Divyam Puri', 'divyampu@gmail.com', '6284908998', '2005-02-11', '$2y$10$OYgBt/NLnmj37Bq76NNtZurjGeHcZRvCCTPYYWMnOUPPXPqMIFewq', NULL, 0, 0, 0),
-(2, 'Rimmi Puri', 'rimmipu@gmail.com', '8968839777', '1978-08-22', '$2y$10$j8k61bXH5Z5swVGMwvdi6.5O8ym3fL6YOP2841awaLX4y84ONwvDy', NULL, 1, 957207, 219701);
+INSERT INTO `User` (`UserID`, `Name`, `Email`, `Phone`, `DOB`, `Password`, `Date`, `IP`, `Remember`, `Verified`, `eotp`, `potp`) VALUES
+(1, 'Divyam Puri', 'divyampu@gmail.com', '6284908998', '2005-02-11', '$2y$10$OYgBt/NLnmj37Bq76NNtZurjGeHcZRvCCTPYYWMnOUPPXPqMIFewq', NULL, '::1', 1, 1, 615726, 473837),
+(2, 'Rimmi Puri', 'rimmipu@gmail.com', '8968839777', '1978-08-22', '$2y$10$j8k61bXH5Z5swVGMwvdi6.5O8ym3fL6YOP2841awaLX4y84ONwvDy', NULL, '::2', 0, 1, 615726, 473837),
+(3, 'Lavkush', 'lavkush@gmail.com', '9999999999', '2006-04-13', '$2y$10$gRBksQdcvCVF4NHTndhuh.VQm3TSP/tCyrK5eOvXtrFl22mjLrO2O', NULL, '::3', 0, 1, 615726, 473837),
+(4, 'Lavish', 'lavish@gmail.com', '8888888888', '2004-12-22', '$2y$10$Cd7wiaG5CFpEuvhBroBC5uLyOU8mG2hUMPQPOhOGOO/tgbwb/eTdK', '2025-10-13', '::4', 0, 1, 615726, 473837);
 
 --
 -- Indexes for dumped tables
@@ -202,7 +209,7 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
-  MODIFY `UserID` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `UserID` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

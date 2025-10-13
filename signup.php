@@ -1,6 +1,30 @@
 <?PHP
     session_start();
     include 'connection.php';
+    function getUserIP()
+    {
+        if (isset($_SERVER['HTTP_CLIENT_IP']) && filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP)) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    }
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // HTTP_X_FORWARDED_FOR can contain a list of IPs.
+        // The first IP is generally the most accurate client IP.
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $firstIp = trim($ipList[0]);
+
+        if (filter_var($firstIp, FILTER_VALIDATE_IP)) {
+            return $firstIp;
+        }
+    }
+    if (isset($_SERVER['REMOTE_ADDR']) && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+    // Return a default if no IP could be determined (should be rare)
+    return 'IP not found';
+    }
+    $user_ip = getUserIP();
+    date_default_timezone_set('Asia/Kolkata'); 
+    $current_system_date = date('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -231,7 +255,7 @@
                         $_SESSION['potp'] = $potp;
                         $_SESSION['eotp'] = $eotp;
                         
-                        $sql_insert = "INSERT INTO `User` (`Name`, `Email`, `Phone`, `DOB`, `Password`, `Verified`, `eotp`, `potp`) VALUES (?, ?, ?, ?, ?, '0', ?, ?)";
+                        $sql_insert = "INSERT INTO `User` (`Name`, `Email`, `Phone`, `DOB`, `Password`, `Date`, `IP`, `Verified`, `eotp`, `potp`) VALUES (?, ?, ?, ?, ?, '$current_system_date', '$user_ip', '0', ?, ?)";
                         $stmt_insert = mysqli_prepare($con, $sql_insert);
                         mysqli_stmt_bind_param($stmt_insert, "sssssss", $name, $email, $phone, $dob, $hpass, $eotp, $potp);
                         
