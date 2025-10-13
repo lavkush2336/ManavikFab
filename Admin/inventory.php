@@ -209,7 +209,7 @@ if (isset($_POST['remove_stock'])) {
                                                     <td>
                                                         <div class='btn-group'>
                                                             <button class='btn btn-sm btn-outline-success' title='Add Stock' data-bs-toggle='modal' data-bs-target='#adjustStockModal' data-product-id='".$row['ProductID']."' data-product-name='".htmlspecialchars($row['Name'])."' data-action='add'><i class='bi bi-plus-circle'></i></button>
-                                                            <a href='products.php' class='btn btn-sm btn-outline-info' title='View/Edit Product'><i class='bi bi-eye'></i></a>
+                                                            <a href='../product-detail.php?product=".$row['ProductID']."' class='btn btn-sm btn-outline-info' title='View/Edit Product'><i class='bi bi-eye'></i></a>
                                                             <button class='btn btn-sm btn-outline-danger' title='Remove Stock' data-bs-toggle='modal' data-bs-target='#adjustStockModal' data-product-id='".$row['ProductID']."' data-product-name='".htmlspecialchars($row['Name'])."' data-action='remove'><i class='bi bi-dash-circle'></i></button>
                                                         </div>
                                                     </td>

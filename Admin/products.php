@@ -37,15 +37,31 @@ if (isset($_POST['update'])) {
     $catID   = mysqli_real_escape_string($con, $_POST['cat']);
     $qty     = mysqli_real_escape_string($con, $_POST['qty']);
     $price   = mysqli_real_escape_string($con, $_POST['price']);
-    $brandID = mysqli_real_escape_string($con, $_POST['brand']);
+    $sprice   = mysqli_real_escape_string($con, $_POST['sprice']);
+    $brandID = $_POST['brand'];
+    $color=$_POST['ecolor'];
+    $size=$_POST['esize'];
     $desc    = mysqli_real_escape_string($con, $_POST['desc']);
 
-    // Fetch Category and Brand names based on their IDs
-    $catNameResult = mysqli_query($con, "SELECT Name FROM Category WHERE CategoryID='$catID'");
-    $catName = mysqli_fetch_assoc($catNameResult)['Name'];
+    if($size==1)
+    {
+        $size="Free Size";
+    }
+    if($size==2)
+    {
+        $size="All Sizes";
+    }
+
+    // Fetch Category Name based on ID
+    $catNameResult = mysqli_query($con, "SELECT `Name` FROM `Category` WHERE `CategoryID`='$catID'");
+    $catName = mysqli_fetch_assoc($catNameResult)['Name'] ?? '';
     
-    $brandNameResult = mysqli_query($con, "SELECT Name FROM brand WHERE BrandID='$brandID'");
-    $brandName = mysqli_fetch_assoc($brandNameResult)['Name'];
+    // 🔥 FIX: Brand Name retrieval for UPDATE - Use explicit check for existence
+    $bsql="SELECT `Name` FROM `brand` WHERE `BrandID`='$brandID'";
+    $bresult=mysqli_query($con,$bsql);
+    $brow=mysqli_fetch_assoc($bresult);
+    $brandName=$brow['Name'];
+    // If no brand name is found, $brandName remains an empty string, preventing the insertion of '0'.
 
     // --- SMART IMAGE UPDATE LOGIC ---
     // 1. Get current image filenames from the database to check against
@@ -87,26 +103,9 @@ if (isset($_POST['update'])) {
     $img5 = mysqli_real_escape_string($con, $newImagePaths['img5']);
     
     // SQL UPDATE Query using Prepared Statement for security
-    $sql = "UPDATE `product` SET 
-                `Name` = ?, 
-                `Category` = ?, 
-                `Brand` = ?, 
-                `Price` = ?, 
-                `Quantity` = ?, 
-                `Description` = ?, 
-                `img1` = ?, `img2` = ?, `img3` = ?, `img4` = ?, `img5` = ?
-            WHERE `ProductID` = ?";
-    
-    $stmt = mysqli_prepare($con, $sql);
-    mysqli_stmt_bind_param($stmt, "sssiissssssi", $name, $catName, $brandName, $price, $qty, $desc, $img1, $img2, $img3, $img4, $img5, $productID);
-    
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: products.php?status=update_success");
-    } else {
-        error_log("Product UPDATE FAILED: " . mysqli_stmt_error($stmt));
-        header("Location: products.php?status=db_update_fail");
-    }
-    exit;
+    $sql = "UPDATE `product` SET `Name` = '$name', `Category` = '$catName', `Brand` = '$brandName', `Price` = '$price',`SPrice`='$sprice', `Quantity` = '$qty', `Description` = '$desc', `Colour`='$color', `Size`='$size', `img1` = '$img1', `img2` = '$img2', `img3` = '$img3', `img4` = '$img4', `img5` = '$img5' WHERE `ProductID` = '$productID'";
+    $result=mysqli_query($con,$sql);
+    header('Location: products.php');
 }
 // --- END: Handle Product UPDATE ---
 
@@ -119,8 +118,20 @@ if(isset($_POST['save']))
     $catID   = mysqli_real_escape_string($con, $_POST['cat']);
     $qty     = mysqli_real_escape_string($con, $_POST['qty']);
     $price   = mysqli_real_escape_string($con, $_POST['price']);
+    $sprice   = mysqli_real_escape_string($con, $_POST['sprice']);
     $brandID = mysqli_real_escape_string($con, $_POST['brand']);
+    $color=$_POST['color'];
+    $size=$_POST['size'];
     $desc    = mysqli_real_escape_string($con, $_POST['desc']);
+
+    if($size==1)
+    {
+        $size="Free Size";
+    }
+    if($size==2)
+    {
+        $size="All Sizes";
+    }
     
     if (empty($catID) || empty($brandID)) {
         error_log("Validation FAILED: Category or Brand ID was empty.");
@@ -135,10 +146,11 @@ if(isset($_POST['save']))
     $result_cat=mysqli_query($con,$sql_cat);
     if ($result_cat && mysqli_num_rows($result_cat) > 0) { $catName=mysqli_fetch_assoc($result_cat)['Name']; }
 
-    // Fetch Brand Name safely
+    // 🔥 FIX: Brand Name retrieval for ADD - Use explicit check for existence
     $sql_brand="SELECT `Name` FROM `brand` WHERE `BrandID`='$brandID'";
     $result_brand=mysqli_query($con,$sql_brand);
-    if ($result_brand && mysqli_num_rows($result_brand) > 0) { $brandName=mysqli_fetch_assoc($result_brand)['Name']; }
+    $row_brand=mysqli_fetch_assoc($result_brand);
+    $brandName=$row_brand['Name'];
     
     $target_dir = dirname(dirname(__FILE__)) . "/images/"; 
     $img_paths = [];
@@ -159,8 +171,8 @@ if(isset($_POST['save']))
     
     $img1 = $img_paths[1] ?? ''; $img2 = $img_paths[2] ?? ''; $img3 = $img_paths[3] ?? ''; $img4 = $img_paths[4] ?? ''; $img5 = $img_paths[5] ?? '';
 
-    $sql="INSERT INTO `product`(`Name`, `Category`, `Brand`, `Price`, `Quantity`, `Description`, `img1`, `img2`, `img3`, `img4`, `img5`) 
-          VALUES ('$name','$catName','$brandName','$price','$qty','$desc','$img1','$img2','$img3','$img4','$img5')";
+    $sql="INSERT INTO `product`(`Name`, `Category`, `Brand`, `Price`, `SPrice`, `Quantity`, `Description`, `Colour`, `Size`, `img1`, `img2`, `img3`, `img4`, `img5`) 
+          VALUES ('$name','$catName','$brandName','$price','$sprice','$qty','$desc','$color','$size','$img1','$img2','$img3','$img4','$img5')";
           
     $result=mysqli_query($con,$sql);
     
@@ -299,7 +311,7 @@ if(isset($_POST['save']))
                                                                     data-bs-productid='".$id."'>
                                                                 <i class='bi bi-pencil'></i>
                                                             </button>
-                                                            <button class='btn btn-sm btn-outline-info' title='View'><i class='bi bi-eye'></i></button>
+                                                            <a href='../product-detail.php?product=".$id."' class='btn btn-sm btn-outline-info' title='View'><i class='bi bi-eye'></i></a>
                                                             <a href='delete.php?product=".$id."' class='btn btn-sm btn-outline-danger' title='Delete'><i class='bi bi-trash'></i></a>
                                                         </div>
                                                     </td>
@@ -332,7 +344,13 @@ if(isset($_POST['save']))
                             <div class="col-md-6 mb-3"><label class="form-label">Stock Quantity *</label><input type="number" class="form-control" required name="qty"></div>
                             <div class="col-md-6 mb-3"><label class="form-label">Price (₹) *</label><input type="number" class="form-control" required name="price"></div>
                         </div>
-                        <div class="row"><div class="col mb-3"><label class="form-label">Brand *</label><select class="form-select" required name="brand"><option value="">Select Brand</option><?php $sql="SELECT `BrandID`,`Name` FROM `brand`"; $result=mysqli_query($con,$sql); while($row=mysqli_fetch_assoc($result)){ echo "<option value='".$row['BrandID']."'>".$row['Name']."</option>"; } ?></select></div></div>
+                        <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Brand *</label><select class="form-select" required name="brand"><option value="">Select Brand</option><?php $sql="SELECT `BrandID`,`Name` FROM `brand`"; $result=mysqli_query($con,$sql); while($row=mysqli_fetch_assoc($result)){ echo "<option value='".$row['BrandID']."'>".$row['Name']."</option>"; } ?></select></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Strock-Through Price (₹) *</label><input type="number" class="form-control" required name="sprice"></div>
+                    </div>
+                    <div class="row">
+                            <div class="col-md-6 mb-3"><label class="form-label">Colour *</label><input type="text" class="form-control" required name="color" id=""></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Size *</label><select class="form-select" required name="size" id=""><option value="">Select Size</option><option value="1">Free Size</option><option value="2">All Sizes</option></select></div>
+                        </div>
                         <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" rows="3" required name="desc"></textarea></div>
                         <div class="mb-3">
                             <label class="form-label">Product Images (up to 5)</label>
@@ -373,7 +391,14 @@ if(isset($_POST['save']))
                             <div class="col-md-6 mb-3"><label class="form-label">Stock Quantity *</label><input type="number" class="form-control" required name="qty" id="editQty"></div>
                             <div class="col-md-6 mb-3"><label class="form-label">Price (₹) *</label><input type="number" class="form-control" required name="price" id="editPrice"></div>
                         </div>
-                        <div class="row"><div class="col mb-3"><label class="form-label">Brand *</label><select class="form-select" required name="brand" id="editBrand"><option value="">Select Brand</option><?php $sql="SELECT `BrandID`,`Name` FROM `brand`"; $result=mysqli_query($con,$sql); while($row=mysqli_fetch_assoc($result)){ echo "<option value='".$row['BrandID']."'>".$row['Name']."</option>"; } ?></select></div></div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label class="form-label">Brand *</label><select class="form-select" required name="brand" id="editBrand"><option value="">Select Brand</option><?php $sql="SELECT `BrandID`,`Name` FROM `brand`"; $result=mysqli_query($con,$sql); while($row=mysqli_fetch_assoc($result)){ echo "<option value='".$row['BrandID']."'>".$row['Name']."</option>"; } ?></select></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Strock-Through Price (₹) *</label><input type="number" class="form-control" required name="sprice" id="editSPrice"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label class="form-label">Colour *</label><input type="text" class="form-control" required name="ecolor" id="editColour"></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Size *</label><select class="form-select" required name="esize" id="editSize"><option value="">Select Size</option><option value="Free Size">Free Size</option><option value="All Sizes">All Sizes</option></select></div>
+                        </div>
                         <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" rows="3" required name="desc" id="editDesc"></textarea></div>
                         
                         <div class="mb-3">
@@ -429,11 +454,19 @@ if(isset($_POST['save']))
                     document.getElementById('editName').value = data.Name;
                     document.getElementById('editQty').value = data.Quantity;
                     document.getElementById('editPrice').value = data.Price;
+                    document.getElementById('editSPrice').value = data.SPrice;
+                    document.getElementById('editColour').value = data.Colour;
+                    document.getElementById('editSize').value = data.Size;
                     document.getElementById('editDesc').value = data.Description;
                     
                     // Set the correct option in dropdowns
-                    document.getElementById('editCat').value = data.CategoryID;
-                    document.getElementById('editBrand').value = data.BrandID;
+                    // We check if data.CategoryID and data.BrandID exist and are numeric 
+                    if (data.CategoryID) {
+                         document.getElementById('editCat').value = data.CategoryID;
+                    }
+                    if (data.BrandID) {
+                        document.getElementById('editBrand').value = data.BrandID;
+                    }
                     
                     // Display current images as previews
                     for (let i = 1; i <= 5; i++) {
