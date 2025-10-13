@@ -84,9 +84,9 @@ $related_products = [
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
+            padding-top: 8rem; /* ADDED: This creates space for the fixed header */
         }
-
-        /* HEADER CSS FROM index.php */
+        
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
@@ -317,7 +317,8 @@ $related_products = [
             .nav-icon { color: #2d2d2d; }
         }
         /* END HEADER CSS */
-
+        
+        /* Product page specific styles */
         .product-gallery {
             background: white;
             border-radius: 1rem;
@@ -473,16 +474,6 @@ $related_products = [
         </div>
     </div>
 
-    <div class="container mt-4 pt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                <li class="breadcrumb-item"><a href="products.php">Products</a></li>
-                <li class="breadcrumb-item"><a href="products.php?category=<?php echo $product['category']; ?>"><?php echo ucfirst($product['category']); ?></a></li>
-                <li class="breadcrumb-item active" aria-current="page"><?php echo $product['name']; ?></li>
-            </ol>
-        </nav>
-    </div>
 
     <div class="container py-5">
         <div class="row">
