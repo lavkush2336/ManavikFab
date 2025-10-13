@@ -28,6 +28,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
+            padding-top: 8rem; /* ADDED: This creates space for the fixed header */
         }
 
         /* HEADER CSS FROM index.php */
@@ -400,18 +401,6 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="container mt-4 pt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Products</li>
-                <?php if($category): ?>
-                    <li class="breadcrumb-item active" aria-current="page"><?php echo ucfirst($category); ?></li>
-                <?php endif; ?>
-            </ol>
-        </nav>
     </div>
 
     <div class="container py-5">
