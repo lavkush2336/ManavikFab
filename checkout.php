@@ -24,6 +24,27 @@ $cart_items = [
     ]
 ];
 
+// Sample saved addresses. In a real application, this would come from the database.
+$saved_addresses = [
+    [
+        'id' => 1,
+        'type' => 'Home',
+        'name' => 'Priya Sharma',
+        'address' => '123 Fashion Street, Connaught Place',
+        'city_pin' => 'New Delhi - 110001',
+        'phone' => '+91 98765 43210'
+    ],
+    [
+        'id' => 2,
+        'type' => 'Work',
+        'name' => 'Priya Sharma',
+        'address' => '456 Business Avenue, Cyber City',
+        'city_pin' => 'Gurugram - 122002',
+        'phone' => '+91 98765 43210'
+    ]
+];
+
+
 $subtotal = array_sum(array_map(function($item) {
     return $item['price'] * $item['quantity'];
 }, $cart_items));
@@ -42,7 +63,6 @@ $total = $subtotal + $shipping + $tax;
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
@@ -328,29 +348,38 @@ $total = $subtotal + $shipping + $tax;
         footer.footer .container ul li a {
             color: #CCCCCC !important;
         }
-        .search-bar {
-            border-radius: 2rem;
-            border: 2px solid #f8c9d8;
-            padding: 0.75rem 1.5rem;
-        }
-        .search-bar:focus {
+        .form-control:focus {
             border-color: #f4b6cc;
             box-shadow: 0 0 0 0.2rem rgba(248, 201, 216, 0.3);
         }
-        .payment-method {
+        .saved-address-card {
             border: 2px solid #e9ecef;
             border-radius: 0.75rem;
             padding: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .payment-method:hover, .payment-method.active {
+        .saved-address-card:hover {
             border-color: #f4b6cc;
             background-color: #fef7f8;
         }
-        .form-control:focus {
-            border-color: #f4b6cc;
-            box-shadow: 0 0 0 0.2rem rgba(248, 201, 216, 0.3);
+        .form-check-input:checked + .saved-address-card {
+             border-color: #ff5f99;
+             background-color: #fff0f6;
+        }
+        .form-check-input {
+            display: none;
+        }
+        .btn-theme-outline {
+            color: #c12b5a;
+            border-color: #c12b5a;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-theme-outline:hover {
+            color: #fff;
+            background-color: #c12b5a;
+            border-color: #c12b5a;
         }
     </style>
 </head>
@@ -440,146 +469,91 @@ $total = $subtotal + $shipping + $tax;
         </div>
     </div>
 
-    <div class="container mt-4 pt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                <li class="breadcrumb-item"><a href="cart.php">Cart</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Checkout</li>
-            </ol>
-        </nav>
-    </div>
-
-    <div class="container py-5">
+   
+    <div class="container py-5" style="margin-top: 100px;">
         <div class="row">
             <div class="col-lg-8 mb-4">
                 <form id="checkoutForm">
                     <div class="checkout-container mb-4">
-                        <h4 class="mb-4">
-                            <i class="bi bi-truck me-2"></i>Shipping Information
-                        </h4>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">First Name *</label>
-                                <input type="text" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Last Name *</label>
-                                <input type="text" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Phone *</label>
-                                <input type="tel" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address *</label>
-                            <input type="text" class="form-control" placeholder="Street Address" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">City *</label>
-                                <input type="text" class="form-control" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">State *</label>
-                                <select class="form-select" required>
-                                    <option value="">Select State</option>
-                                    <option value="delhi">Delhi</option>
-                                    <option value="mumbai">Mumbai</option>
-                                    <option value="bangalore">Bangalore</option>
-                                    <option value="chennai">Chennai</option>
-                                    <option value="kolkata">Kolkata</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">PIN Code *</label>
-                                <input type="text" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Additional Notes</label>
-                            <textarea class="form-control" rows="3" placeholder="Any special instructions for delivery"></textarea>
-                        </div>
-                    </div>
+                        <h4 class="mb-3"><i class="bi bi-truck me-2"></i>Shipping Address</h4>
+                        
+                        <button class="btn btn-theme-outline mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addNewAddressCollapse" id="toggleAddressFormBtn">
+                            <i class="bi bi-plus-circle me-2"></i>Add New Shipping Address
+                        </button>
 
-                    <div class="checkout-container mb-4">
-                        <h4 class="mb-4">
-                            <i class="bi bi-credit-card me-2"></i>Payment Method
-                        </h4>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="payment-method" onclick="selectPayment('card')">
-                                    <div class="d-flex align-items-center">
-                                        <input type="radio" name="payment" value="card" class="me-3">
-                                        <div>
-                                            <h6 class="mb-1">Credit/Debit Card</h6>
-                                            <small class="text-muted">Visa, Mastercard, RuPay</small>
-                                        </div>
+                        <div class="collapse" id="addNewAddressCollapse">
+                            <div class="card card-body border-2" style="border-color: #f4b6cc !important;">
+                                <h5 class="mb-3">Enter New Address Details</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">First Name *</label>
+                                        <input type="text" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Last Name *</label>
+                                        <input type="text" class="form-control" required>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="payment-method" onclick="selectPayment('upi')">
-                                    <div class="d-flex align-items-center">
-                                        <input type="radio" name="payment" value="upi" class="me-3">
-                                        <div>
-                                            <h6 class="mb-1">UPI</h6>
-                                            <small class="text-muted">Google Pay, PhonePe, Paytm</small>
-                                        </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Address *</label>
+                                    <input type="text" class="form-control" placeholder="Street Address" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">City *</label>
+                                        <input type="text" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">State *</label>
+                                        <select class="form-select" required>
+                                            <option value="">Select State</option>
+                                            <option value="delhi">Delhi</option>
+                                            <option value="punjab">Punjab</option>
+                                            <option value="mumbai">Mumbai</option>
+                                            <option value="bangalore">Bangalore</option>
+                                            <option value="chennai">Chennai</option>
+                                            <option value="kolkata">Kolkata</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">PIN Code *</label>
+                                        <input type="text" class="form-control" required>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="payment-method" onclick="selectPayment('netbanking')">
-                                    <div class="d-flex align-items-center">
-                                        <input type="radio" name="payment" value="netbanking" class="me-3">
-                                        <div>
-                                            <h6 class="mb-1">Net Banking</h6>
-                                            <small class="text-muted">All major banks</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="payment-method" onclick="selectPayment('cod')">
-                                    <div class="d-flex align-items-center">
-                                        <input type="radio" name="payment" value="cod" class="me-3">
-                                        <div>
-                                            <h6 class="mb-1">Cash on Delivery</h6>
-                                            <small class="text-muted">Pay when you receive</small>
-                                        </div>
-                                    </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="saveAddress">
+                                    <label class="form-check-label" for="saveAddress">
+                                        Save this address for future use
+                                    </label>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="cardDetails" class="mt-4" style="display: none;">
-                            <h6 class="mb-3">Card Details</h6>
-                            <div class="row">
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Card Number</label>
-                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                        <hr class="my-4">
+
+                        <div id="savedAddressesWrapper">
+                            <h5 class="mb-3"><i class="bi bi-journal-bookmark me-2"></i>Or Select a Saved Address</h5>
+                            <?php if (empty($saved_addresses)): ?>
+                                <div class="alert alert-info">
+                                    You have no saved addresses. Please add a new one above.
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Expiry Date</label>
-                                    <input type="text" class="form-control" placeholder="MM/YY">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">CVV</label>
-                                    <input type="text" class="form-control" placeholder="123">
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Cardholder Name</label>
-                                    <input type="text" class="form-control" placeholder="Name on card">
-                                </div>
-                            </div>
+                            <?php else: ?>
+                                <?php foreach ($saved_addresses as $index => $address): ?>
+                                    <label for="address-<?php echo $address['id']; ?>" class="w-100 mb-2">
+                                        <input class="form-check-input" type="radio" name="selected_address" value="<?php echo $address['id']; ?>" id="address-<?php echo $address['id']; ?>" <?php echo $index === 0 ? 'checked' : ''; ?>>
+                                        <div class="saved-address-card">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <span class="badge bg-secondary mb-2"><?php echo htmlspecialchars($address['type']); ?></span>
+                                                    <p class="mb-1 fw-bold"><?php echo htmlspecialchars($address['name']); ?></p>
+                                                    <p class="mb-1 text-muted small"><?php echo htmlspecialchars($address['address']); ?>, <?php echo htmlspecialchars($address['city_pin']); ?></p>
+                                                    <p class="mb-0 text-muted small">Phone: <?php echo htmlspecialchars($address['phone']); ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </form>
@@ -625,37 +599,12 @@ $total = $subtotal + $shipping + $tax;
                         <strong class="text-danger">₹<?php echo number_format($total); ?></strong>
                     </div>
                     
-                    <div class="alert alert-info">
-                        <small>
-                            <i class="bi bi-shield-check me-1"></i>
-                            Your payment information is secure and encrypted
-                        </small>
-                    </div>
-                    
                     <button type="submit" form="checkoutForm" class="btn btn-primary-custom w-100 mb-3">
-                        <i class="bi bi-lock me-2"></i>Place Order Securely
+                        <i class="bi bi-lock me-2"></i>Proceed to Payment
                     </button>
                     
                     <div class="text-center">
-                        <small class="text-muted">By placing your order, you agree to our Terms & Conditions</small>
-                    </div>
-                </div>
-
-                <div class="checkout-container mt-4">
-                    <h6 class="mb-3">Delivery Information</h6>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <i class="bi bi-truck text-primary"></i>
-                            <small class="d-block">Free Shipping</small>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-calendar text-success"></i>
-                            <small class="d-block">3-5 Days</small>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-arrow-clockwise text-warning"></i>
-                            <small class="d-block">Easy Returns</small>
-                        </div>
+                        <small class="text-muted">By proceeding, you agree to our Terms & Conditions</small>
                     </div>
                 </div>
             </div>
@@ -683,99 +632,105 @@ $total = $subtotal + $shipping + $tax;
             onScroll();
         })();
 
-        // Dynamic Search Bar functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Search Bar functionality
             const searchTrigger = document.getElementById('searchTrigger');
             const mobileSearchTrigger = document.getElementById('mobileSearchTrigger');
             const searchOverlay = document.getElementById('searchOverlay');
             const closeSearchBtn = document.getElementById('closeSearch');
 
             const openSearch = () => {
-                if (searchOverlay) {
-                    searchOverlay.classList.add('active');
-                    const searchInput = searchOverlay.querySelector('input[type="text"]');
-                    if (searchInput) {
-                        searchInput.focus();
-                    }
-                }
+                if (searchOverlay) searchOverlay.classList.add('active');
             };
-
             const closeSearch = () => {
-                if (searchOverlay) {
-                    searchOverlay.classList.remove('active');
-                }
+                if (searchOverlay) searchOverlay.classList.remove('active');
             };
 
-            if (searchTrigger) {
-                searchTrigger.addEventListener('click', openSearch);
-            }
+            if (searchTrigger) searchTrigger.addEventListener('click', openSearch);
+            if (mobileSearchTrigger) mobileSearchTrigger.addEventListener('click', openSearch);
+            if (closeSearchBtn) closeSearchBtn.addEventListener('click', closeSearch);
+            if (searchOverlay) searchOverlay.addEventListener('click', (e) => {
+                if (e.target === searchOverlay) closeSearch();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeSearch();
+            });
 
-            if (mobileSearchTrigger) {
-                mobileSearchTrigger.addEventListener('click', openSearch);
-            }
+            // Checkout-specific JS
+            const addressCollapseEl = document.getElementById('addNewAddressCollapse');
+            const toggleBtn = document.getElementById('toggleAddressFormBtn');
+            const savedAddressesWrapper = document.getElementById('savedAddressesWrapper');
+            
+            if (addressCollapseEl) {
+                const radioButtons = savedAddressesWrapper.querySelectorAll('input[type="radio"]');
 
-            if (closeSearchBtn) {
-                closeSearchBtn.addEventListener('click', closeSearch);
-            }
+                addressCollapseEl.addEventListener('show.bs.collapse', () => {
+                    toggleBtn.classList.remove('btn-theme-outline');
+                    toggleBtn.classList.add('btn-danger');
+                    toggleBtn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Cancel';
+                    
+                    savedAddressesWrapper.style.opacity = '0.5';
+                    radioButtons.forEach(radio => {
+                        radio.checked = false;
+                        radio.disabled = true;
+                    });
+                });
 
-            if (searchOverlay) {
-                searchOverlay.addEventListener('click', (e) => {
-                    if (e.target === searchOverlay) {
-                        closeSearch();
+                addressCollapseEl.addEventListener('hide.bs.collapse', () => {
+                    toggleBtn.classList.add('btn-theme-outline');
+                    toggleBtn.classList.remove('btn-danger');
+                    toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add New Shipping Address';
+
+                    savedAddressesWrapper.style.opacity = '1';
+                    radioButtons.forEach(radio => {
+                        radio.disabled = false;
+                    });
+                    
+                    if (radioButtons.length > 0) {
+                        // Re-select the first saved address if it exists
+                        radioButtons[0].checked = true;
                     }
                 });
             }
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeSearch();
-                }
-            });
-        });
 
-        // Checkout-specific JS
-        function selectPayment(method) {
-            document.querySelectorAll('.payment-method').forEach(pm => {
-                pm.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            const cardDetails = document.getElementById('cardDetails');
-            if (method === 'card') {
-                cardDetails.style.display = 'block';
-            } else {
-                cardDetails.style.display = 'none';
-            }
-        }
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const isAddingNewAddress = addressCollapseEl.classList.contains('show');
+                let isAddressSelected = false;
 
-        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid');
+                if (isAddingNewAddress) {
+                    let isValid = true;
+                    const requiredFields = document.querySelectorAll('#addNewAddressCollapse [required]');
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            isValid = false;
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (!isValid) {
+                        alert('Please fill in all required fields for the new address.');
+                        return;
+                    }
+                    isAddressSelected = true;
                 } else {
-                    field.classList.remove('is-invalid');
+                    const selectedAddress = document.querySelector('input[name="selected_address"]:checked');
+                    if (selectedAddress) {
+                        isAddressSelected = true;
+                    }
                 }
+                
+                if (!isAddressSelected) {
+                    alert('Please select a shipping address or add a new one.');
+                    return;
+                }
+                
+                alert('Proceeding to payment...');
+                window.location.href = 'order-confirmation.php';
             });
-            
-            if (!isValid) {
-                alert('Please fill in all required fields.');
-                return;
-            }
-            
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            if (!selectedPayment) {
-                alert('Please select a payment method.');
-                return;
-            }
-            
-            alert('Order placed successfully! You will receive a confirmation email shortly.');
-            window.location.href = 'order-confirmation.php';
         });
     </script>
 </body>
