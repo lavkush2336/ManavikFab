@@ -537,16 +537,7 @@ $total = $subtotal + $shipping + $tax;
         </div>
     </div>
 
-    <!-- <div class="container mt-4 pt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
-            </ol>
-        </nav>
-    </div> -->
-
-    <div class="container py-5">
+    <div class="container py-5" style="margin-top: 100px;">
         <div class="row">
             <div class="col-lg-8 mb-4">
                 <div class="cart-container">

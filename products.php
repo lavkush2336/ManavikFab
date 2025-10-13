@@ -402,19 +402,19 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
         </div>
     </div>
 
-    <div class="container mt-4 pt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Products</li>
-                <?php if($category): ?>
-                    <li class="breadcrumb-item active" aria-current="page"><?php echo ucfirst($category); ?></li>
-                <?php endif; ?>
-            </ol>
-        </nav>
-    </div>
+    <div class="container" style="margin-top: 120px;">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-end">
+                <select class="form-select" style="width: auto;">
+                    <option value="newest">Newest First</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="rating">Highest Rated</option>
+                </select>
+            </div>
+        </div>
 
-    <div class="container py-5">
         <div class="row">
             <div class="col-lg-3 mb-4">
                 <div class="filter-sidebar">
@@ -527,22 +527,13 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
                     <div>
                         <span class="text-muted">Showing 1-12 of 48 products</span>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <select class="form-select" style="width: auto;">
-                            <option value="newest">Newest First</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="popular">Most Popular</option>
-                            <option value="rating">Highest Rated</option>
-                        </select>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary active">
-                                <i class="bi bi-grid-3x3-gap"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="bi bi-list"></i>
-                            </button>
-                        </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary active">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary">
+                            <i class="bi bi-list"></i>
+                        </button>
                     </div>
                 </div>
 
