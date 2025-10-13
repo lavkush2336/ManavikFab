@@ -74,25 +74,250 @@ $related_products = [
     <meta name="description" content="<?php echo $product['description']; ?>">
     <meta name="keywords" content="<?php echo $product['name']; ?>, sarees, ethnic wear, women fashion">
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
         }
+
+        /* HEADER CSS FROM index.php */
         .navbar-brand {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #2d2d2d;
+            transition: color 0.3s ease;
         }
+        
+        .site-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: #ffffff;
+            padding: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .site-navbar.scrolled .navbar-brand,
+        .site-navbar.scrolled .nav-icon {
+            color: #2d2d2d;
+        }
+
+        .site-navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-navbar .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .site-navbar .nav-links .nav-link {
+            color: #444;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: color .2s ease, transform .2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .site-navbar .nav-links .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #ff5f99;
+            transition: all .3s ease;
+            transform: translateX(-50%);
+        }
+
+        .site-navbar .nav-links .nav-link:hover:after {
+            width: 100%;
+        }
+
+        .site-navbar .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .nav-icon {
+            color: #2d2d2d;
+            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: color .2s ease, transform .2s ease, background .2s ease;
+        }
+
+        .nav-icon:hover {
+            color: #ff5f99;
+            transform: translateY(-2px);
+        }
+
+        .nav-cart {
+            position: relative;
+        }
+        .nav-cart .nav-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: .6rem;
+            background: #dc3545;
+            color: #fff;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        
+        .search-placeholder-wrapper {
+            max-width: 400px;
+        }
+        .search-placeholder {
+            background: #f1f1f1;
+            color: #888;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .search-placeholder:hover {
+            background: #e9e9e9;
+            color: #444;
+        }
+
+        /* Fullscreen search overlay */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .search-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .search-overlay-content {
+            background: #fff;
+            width: 90%;
+            max-width: 900px;
+            padding: 2.5rem;
+            border-radius: 12px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .search-overlay.active .search-overlay-content {
+            transform: scale(1);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .search-input-wrapper input:focus {
+            border-color: #ff5f99;
+            box-shadow: 0 0 0 4px rgba(255, 95, 153, 0.1);
+        }
+
+        .btn-close-overlay {
+            font-size: 1.25rem;
+            color: #888;
+            background: none;
+            border: none;
+            transition: color 0.3s ease;
+        }
+        .btn-close-overlay:hover {
+            color: #444;
+        }
+
+        .search-suggestions-container {
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            margin-top: 2rem;
+        }
+        .search-categories li a,
+        .search-list li a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            color: #444;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+            border-radius: 8px;
+        }
+        .search-categories li a i {
+            margin-right: 0.75rem;
+        }
+        .search-categories li a:hover,
+        .search-list li a:hover {
+            background: #f5f5f5;
+            color: #ff5f99;
+        }
+        .search-list .badge {
+            background: #f1f1f1 !important;
+            color: #888 !important;
+            font-weight: 500;
+        }
+
+        @media (max-width:992px){
+            .site-navbar .nav-links { display: none; }
+            .site-navbar .nav-icons { flex-grow: 1; justify-content: flex-end; }
+            .site-navbar.scrolled .nav-icon, .site-navbar.scrolled .navbar-brand { color: #444 !important; }
+            .nav-icon { color: #2d2d2d; }
+        }
+        /* END HEADER CSS */
+
         .product-gallery {
             background: white;
             border-radius: 1rem;
@@ -163,81 +388,92 @@ $related_products = [
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">
-                <i class="bi bi-heart-fill text-danger me-2"></i>ManavikFab
-            </a>
+    <nav class="site-navbar">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a class="navbar-brand" href="index.php">ManavikFab</a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            Categories
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="products.php?category=ethnic">Ethnic Wear</a></li>
-                            <li><a class="dropdown-item" href="products.php?category=western">Western Wear</a></li>
-                            <li><a class="dropdown-item" href="products.php?category=sarees">Sarees</a></li>
-                            <li><a class="dropdown-item" href="products.php?category=lehengas">Lehengas</a></li>
-                            <li><a class="dropdown-item" href="products.php?category=accessories">Accessories</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="products.php">All Products</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="about.php">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="contact.php">Contact</a>
-                    </li>
-                </ul>
-                
-                <form class="d-flex me-3">
-                    <input class="form-control search-bar" type="search" placeholder="Search for products..." aria-label="Search">
-                </form>
-                
-                <div class="d-flex align-items-center">
-                    <a href="wishlist.php" class="btn btn-outline-light me-2">
-                        <i class="bi bi-heart"></i>
-                    </a>
-                    <a href="cart.php" class="btn btn-outline-light me-2">
-                        <i class="bi bi-cart3"></i>
-                        <span class="badge bg-danger ms-1">3</span>
-                    </a>
+            <div class="search-placeholder-wrapper d-none d-md-flex align-items-center flex-grow-1 mx-5">
+                <div class="search-placeholder w-100" id="searchTrigger">
+                    <i class="bi bi-search me-2"></i>
+                    <span>Search by inspiration</span>
+                </div>
+            </div>
+
+            <ul class="nav nav-links d-none d-lg-flex">
+                <li class="nav-item"><a class="nav-link" href="#">New Arrivals</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Collections</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Dresses</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Sale</a></li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="nav-icons">
+                    <button class="btn nav-icon d-md-none" aria-label="Search" id="mobileSearchTrigger"><i class="bi bi-search"></i></button>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> My Account
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                                <li><a class="dropdown-item" href="orders.php">My Orders</a></li>
-                                <li><a class="dropdown-item" href="wishlist.php">Wishlist</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-                            </ul>
-                        </div>
+                        <a href="profile.php" class="nav-icon" title="Profile"><i class="bi bi-person-circle"></i></a>
                     <?php else: ?>
-                        <a href="login.php" class="btn btn-outline-primary me-2">Login</a>
-                        <a href="signup.php" class="btn btn-primary-custom">Sign Up</a>
+                        <a href="login.php" class="nav-icon" title="Login"><i class="bi bi-box-arrow-in-right"></i></a>
                     <?php endif; ?>
+                    <a href="wishlist.php" class="nav-icon" title="Wishlist"><i class="bi bi-heart"></i></a>
+                    <a href="cart.php" class="nav-icon nav-cart" title="Cart">
+                        <i class="bi bi-cart3"></i>
+                        <span class="nav-badge">3</span>
+                    </a>
+                </div>
+                <button class="btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavCollapse">
+                    <i class="bi bi-list" style="font-size:1.5rem"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="collapse d-lg-none w-100" id="siteNavCollapse">
+            <ul class="nav flex-column mt-3 px-3">
+                <li class="nav-item"><a class="nav-link text-dark" href="#">New Arrivals</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="#">Collections</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="#">Dresses</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="#">Sale</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-overlay-content">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="search-input-wrapper flex-grow-1 me-4">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search by inspiration" autofocus>
+                </div>
+                <button class="btn btn-close-overlay" id="closeSearch">Close</button>
+            </div>
+            <div class="search-suggestions-container">
+                <div class="row">
+                    <div class="col-12 col-md-4 search-categories">
+                        <ul class="list-unstyled">
+                            <li><a href="#"><i class="bi bi-fire"></i> Trending</a></li>
+                            <li><a href="#"><i class="bi bi-grid-3x3"></i> By Category</a></li>
+                            <li><a href="#"><i class="bi bi-code-slash"></i> By Technology</a></li>
+                            <li><a href="#"><i class="bi bi-folder-fill"></i> Collections</a></li>
+                            <li><a href="#"><i class="bi bi-book"></i> Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-12 col-md-8 search-list mt-4 mt-md-0">
+                        <ul class="list-unstyled">
+                            <li><a href="#">Portfolio Websites <span class="badge bg-light text-dark">9143</span></a></li>
+                            <li><a href="#">Free fonts <span class="badge bg-light text-dark">288</span></a></li>
+                            <li><a href="#">Animated websites <span class="badge bg-light text-dark">10837</span></a></li>
+                            <li><a href="#">Sites of the Day <span class="badge bg-light text-dark">6623</span></a></li>
+                            <li><a href="#">Scrolling <span class="badge bg-light text-dark">5621</span></a></li>
+                            <li><a href="#">UI design <span class="badge bg-light text-dark">6709</span></a></li>
+                            <li><a href="#">E-commerce layouts <span class="badge bg-light text-dark">6069</span></a></li>
+                            <li><a href="#">Photography websites <span class="badge bg-light text-dark">1513</span></a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <!-- Breadcrumb -->
-    <div class="container mt-4">
+    <div class="container mt-4 pt-5">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php">Home</a></li>
@@ -248,10 +484,8 @@ $related_products = [
         </nav>
     </div>
 
-    <!-- Product Detail Section -->
     <div class="container py-5">
         <div class="row">
-            <!-- Product Gallery -->
             <div class="col-lg-6 mb-4">
                 <div class="product-gallery">
                     <div class="mb-3">
@@ -268,12 +502,10 @@ $related_products = [
                 </div>
             </div>
 
-            <!-- Product Info -->
             <div class="col-lg-6">
                 <div class="product-info">
                     <h2 class="mb-3"><?php echo $product['name']; ?></h2>
                     
-                    <!-- Rating -->
                     <div class="d-flex align-items-center mb-3">
                         <div class="text-warning me-2">
                             <?php for($i = 1; $i <= 5; $i++): ?>
@@ -284,17 +516,14 @@ $related_products = [
                         <span class="text-muted">(<?php echo $product['reviews']; ?> reviews)</span>
                     </div>
 
-                    <!-- Price -->
                     <div class="mb-4">
                         <span class="h3 text-danger fw-bold">₹<?php echo number_format($product['price']); ?></span>
                         <span class="h5 text-muted text-decoration-line-through ms-2">₹<?php echo number_format($product['original_price']); ?></span>
                         <span class="badge bg-danger ms-2"><?php echo $product['discount']; ?>% OFF</span>
                     </div>
 
-                    <!-- Description -->
                     <p class="text-muted mb-4"><?php echo $product['description']; ?></p>
 
-                    <!-- Color Selection -->
                     <div class="mb-4">
                         <h6>Color:</h6>
                         <div class="d-flex gap-2">
@@ -305,7 +534,6 @@ $related_products = [
                         </div>
                     </div>
 
-                    <!-- Size Selection -->
                     <div class="mb-4">
                         <h6>Size:</h6>
                         <div class="d-flex gap-2 flex-wrap">
@@ -315,7 +543,6 @@ $related_products = [
                         </div>
                     </div>
 
-                    <!-- Quantity -->
                     <div class="mb-4">
                         <h6>Quantity:</h6>
                         <div class="d-flex align-items-center">
@@ -326,7 +553,6 @@ $related_products = [
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="d-flex gap-3 mb-4">
                         <button class="btn btn-primary-custom flex-fill">
                             <i class="bi bi-cart-plus me-2"></i>Add to Cart
@@ -336,7 +562,6 @@ $related_products = [
                         </button>
                     </div>
 
-                    <!-- Features -->
                     <div class="mb-4">
                         <h6>Features:</h6>
                         <ul class="list-unstyled">
@@ -346,7 +571,6 @@ $related_products = [
                         </ul>
                     </div>
 
-                    <!-- Delivery Info -->
                     <div class="border-top pt-3">
                         <div class="row text-center">
                             <div class="col-4">
@@ -367,7 +591,6 @@ $related_products = [
             </div>
         </div>
 
-        <!-- Product Details Tabs -->
         <div class="row mt-5">
             <div class="col-12">
                 <div class="bg-white rounded-3 p-4">
@@ -405,7 +628,6 @@ $related_products = [
                                         <p class="text-muted"><?php echo $product['reviews']; ?> reviews</p>
                                     </div>
                                     <div class="col-md-8">
-                                        <!-- Sample Reviews -->
                                         <div class="border-bottom pb-3 mb-3">
                                             <div class="d-flex justify-content-between">
                                                 <h6>Priya Sharma</h6>
@@ -453,7 +675,6 @@ $related_products = [
             </div>
         </div>
 
-        <!-- Related Products -->
         <div class="row mt-5">
             <div class="col-12">
                 <h4 class="mb-4">Related Products</h4>
@@ -488,12 +709,77 @@ $related_products = [
         </div>
     </div>
 
-    <!-- Footer -->
-   <?php include 'footer.php'; ?>
-    <!-- Bootstrap JS -->
+    <?php include 'footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <script>
+        // Navbar scroll effect
+        (function(){
+            const navbar = document.querySelector('.site-navbar');
+            if(!navbar) return;
+            const onScroll = () => {
+                if(window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            };
+            document.addEventListener('scroll', onScroll, {passive:true});
+            onScroll();
+        })();
+
+        // Dynamic Search Bar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchTrigger = document.getElementById('searchTrigger');
+            const mobileSearchTrigger = document.getElementById('mobileSearchTrigger');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const closeSearchBtn = document.getElementById('closeSearch');
+
+            const openSearch = () => {
+                if (searchOverlay) {
+                    searchOverlay.classList.add('active');
+                    const searchInput = searchOverlay.querySelector('input[type="text"]');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+            };
+
+            const closeSearch = () => {
+                if (searchOverlay) {
+                    searchOverlay.classList.remove('active');
+                }
+            };
+
+            if (searchTrigger) {
+                searchTrigger.addEventListener('click', openSearch);
+            }
+
+            if (mobileSearchTrigger) {
+                mobileSearchTrigger.addEventListener('click', openSearch);
+            }
+
+            if (closeSearchBtn) {
+                closeSearchBtn.addEventListener('click', closeSearch);
+            }
+
+            if (searchOverlay) {
+                searchOverlay.addEventListener('click', (e) => {
+                    if (e.target === searchOverlay) {
+                        closeSearch();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSearch();
+                }
+            });
+        });
+
+        // Product detail page specific JS
         function changeImage(thumbnail, imageSrc) {
             document.getElementById('mainImage').src = imageSrc;
             document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
@@ -521,4 +807,4 @@ $related_products = [
         }
     </script>
 </body>
-</html> 
+</html>
