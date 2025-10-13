@@ -203,7 +203,7 @@ $total = $subtotal + $shipping + $tax;
         </div>
     </nav>
 
-    <!-- Breadcrumb -->
+    <!-- Breadcrumb
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -212,7 +212,7 @@ $total = $subtotal + $shipping + $tax;
                 <li class="breadcrumb-item active" aria-current="page">Checkout</li>
             </ol>
         </nav>
-    </div>
+    </div> -->
 
     <!-- Checkout Section -->
     <div class="container py-5">
