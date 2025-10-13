@@ -392,7 +392,7 @@ include 'connection.php';
         </div>
     </div>
 
-    <section class="py-5 text-center text-white" style="background: rgba(0,0,0,0.2);">
+    <section class="py-5 text-center text-white" style="background: rgba(0,0,0,0.2); margin-top: 100px;">
         <div class="container" data-aos="fade-up">
             <h1 class="display-3 fw-bold">Our Story</h1>
             <p class="lead col-lg-8 mx-auto">ManavikFab was born from a simple vision: to make premium fashion accessible to every woman, celebrating beauty, confidence, and empowerment through clothing.</p>
