@@ -2,6 +2,12 @@
 session_start();
 include 'connection.php';
 
+if(!isset($_SESSION['userid']))
+{
+    header('Location: login.php');
+    exit();
+}
+
 // Sample checkout data
 $cart_items = [
     [
@@ -86,7 +92,7 @@ $total = $subtotal + $shipping + $tax;
             left: 0;
             right: 0;
             z-index: 1050;
-            background: #ffffff; /* Change for checkout page */
+            background: #ffffff;
             padding: 1rem 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         }
@@ -109,7 +115,7 @@ $total = $subtotal + $shipping + $tax;
         }
 
         .site-navbar .nav-links .nav-link {
-            color: #444; /* Set link color to dark */
+            color: #444;
             font-weight: 500;
             padding: 0.5rem 1rem;
             transition: color .2s ease, transform .2s ease;
@@ -141,7 +147,7 @@ $total = $subtotal + $shipping + $tax;
         }
         
         .nav-icon {
-            color: #2d2d2d; /* Set icon color to dark */
+            color: #2d2d2d;
             font-size: 1.25rem;
             display: inline-flex;
             align-items: center;
@@ -326,7 +332,6 @@ $total = $subtotal + $shipping + $tax;
             background: #2d2d2d;
             color: white;
         }
-        /* Ensure footer links, paragraphs, and list items are readable on dark background */
         footer.footer p,
         footer.footer li,
         footer.footer a,
@@ -341,7 +346,6 @@ $total = $subtotal + $shipping + $tax;
             color: #FFFFFF !important;
             text-decoration: none !important;
         }
-        /* Target the container descendants for maximum specificity */
         footer.footer .container a,
         footer.footer .container p,
         footer.footer .container li,
@@ -370,16 +374,32 @@ $total = $subtotal + $shipping + $tax;
         .form-check-input {
             display: none;
         }
-        .btn-theme-outline {
+        .btn-theme-action {
+            background-color: #fff0f6;
+            border: 1px solid #f8c9d8;
             color: #c12b5a;
-            border-color: #c12b5a;
             font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
             transition: all 0.3s ease;
         }
-        .btn-theme-outline:hover {
-            color: #fff;
-            background-color: #c12b5a;
-            border-color: #c12b5a;
+        .btn-theme-action:hover {
+            background-color: #f8c9d8;
+            border-color: #f4b6cc;
+            color: #2d2d2d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .checkout-container h4 {
+            font-size: 1.5rem; 
+            margin-bottom: 0;
+        }
+
+        .btn-ship {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
     </style>
 </head>
@@ -475,22 +495,24 @@ $total = $subtotal + $shipping + $tax;
             <div class="col-lg-8 mb-4">
                 <form id="checkoutForm">
                     <div class="checkout-container mb-4">
-                        <h4 class="mb-3"><i class="bi bi-truck me-2"></i>Shipping Address</h4>
                         
-                        <button class="btn btn-theme-outline mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addNewAddressCollapse" id="toggleAddressFormBtn">
-                            <i class="bi bi-plus-circle me-2"></i>Add New Shipping Address
-                        </button>
-
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4><i class="bi bi-truck me-2"></i>Shipping Address</h4>
+                            <button class="btn btn-theme-action" type="button" data-bs-toggle="collapse" data-bs-target="#addNewAddressCollapse" id="toggleAddressFormBtn">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Address
+                            </button>
+                        </div>
+                        
                         <div class="collapse" id="addNewAddressCollapse">
-                            <div class="card card-body border-2" style="border-color: #f4b6cc !important;">
+                            <div class="card card-body border-2 mb-4" style="border-color: #f4b6cc !important;">
                                 <h5 class="mb-3">Enter New Address Details</h5>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">First Name *</label>
+                                        <label class="form-label">Receiver's First Name *</label>
                                         <input type="text" class="form-control" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Last Name *</label>
+                                        <label class="form-label">Receiver's Last Name *</label>
                                         <input type="text" class="form-control" required>
                                     </div>
                                 </div>
@@ -520,16 +542,26 @@ $total = $subtotal + $shipping + $tax;
                                         <input type="text" class="form-control" required>
                                     </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="" id="saveAddress">
-                                    <label class="form-check-label" for="saveAddress">
-                                        Save this address for future use
-                                    </label>
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Number *</label>
+                                    <input type="tel" class="form-control" placeholder="10-digit mobile number" required pattern="[0-9]{10}">
                                 </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="saveAddress" style="display: inline-block;">
+                                        <label class="form-check-label" for="saveAddress">
+                                            Save this address
+                                        </label>
+                                    </div>
+                                    <button type="submit" form="checkoutForm" class="btn btn-dark btn-ship">
+                                        <span>Ship</span>
+                                        <i class="bi bi-truck"></i>
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
-
-                        <hr class="my-4">
 
                         <div id="savedAddressesWrapper">
                             <h5 class="mb-3"><i class="bi bi-journal-bookmark me-2"></i>Or Select a Saved Address</h5>
@@ -665,7 +697,7 @@ $total = $subtotal + $shipping + $tax;
                 const radioButtons = savedAddressesWrapper.querySelectorAll('input[type="radio"]');
 
                 addressCollapseEl.addEventListener('show.bs.collapse', () => {
-                    toggleBtn.classList.remove('btn-theme-outline');
+                    toggleBtn.classList.remove('btn-theme-action');
                     toggleBtn.classList.add('btn-danger');
                     toggleBtn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Cancel';
                     
@@ -677,9 +709,9 @@ $total = $subtotal + $shipping + $tax;
                 });
 
                 addressCollapseEl.addEventListener('hide.bs.collapse', () => {
-                    toggleBtn.classList.add('btn-theme-outline');
+                    toggleBtn.classList.add('btn-theme-action');
                     toggleBtn.classList.remove('btn-danger');
-                    toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add New Shipping Address';
+                    toggleBtn.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add New Address';
 
                     savedAddressesWrapper.style.opacity = '1';
                     radioButtons.forEach(radio => {
@@ -687,7 +719,6 @@ $total = $subtotal + $shipping + $tax;
                     });
                     
                     if (radioButtons.length > 0) {
-                        // Re-select the first saved address if it exists
                         radioButtons[0].checked = true;
                     }
                 });
@@ -701,8 +732,8 @@ $total = $subtotal + $shipping + $tax;
 
                 if (isAddingNewAddress) {
                     let isValid = true;
-                    const requiredFields = document.querySelectorAll('#addNewAddressCollapse [required]');
-                    requiredFields.forEach(field => {
+                    const formRequiredFields = document.querySelectorAll('#addNewAddressCollapse [required]');
+                    formRequiredFields.forEach(field => {
                         if (!field.value.trim()) {
                             isValid = false;
                             field.classList.add('is-invalid');
