@@ -428,7 +428,7 @@ $total = $subtotal + $shipping + $tax;
                     <?php if(isset($_SESSION['user_id'])): ?>
                         <a href="profile.php" class="nav-icon" title="Profile"><i class="bi bi-person-circle"></i></a>
                     <?php else: ?>
-                        <a href="login.php" class="nav-icon" title="Login"><i class="bi bi-box-arrow-in-right"></i></a>
+                       <a href="logout.php" class="nav-icon" title="Logout"><i class="bi bi-box-arrow-in-right"></i></a>
                     <?php endif; ?>
                     <a href="wishlist.php" class="nav-icon" title="Wishlist"><i class="bi bi-heart"></i></a>
                     <a href="cart.php" class="nav-icon nav-cart" title="Cart">
