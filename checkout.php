@@ -1,56 +1,158 @@
 <?php
 session_start();
-include 'connection.php';
 
+include 'connection.php'; // Make sure this file correctly establishes $con
+
+// --- PHP BLOCK TO HANDLE AJAX REQUESTS (CRITICAL FOR SESSION UPDATE ON RADIO CHANGE) ---
+// This checks if a request was made specifically to update the session address
+if (isset($_POST['action']) && $_POST['action'] === 'update_session_address' && isset($_POST['address_id'])) {
+    
+    // Sanitize the input
+    $addressId = filter_var($_POST['address_id'], FILTER_VALIDATE_INT);
+    
+    if ($addressId !== false && $addressId > 0) {
+        // --- THE FIX: Set the session variable directly via AJAX ---
+        $_SESSION['address'] = $addressId;
+        
+        // Send a success JSON response and exit
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success', 'address_id' => $addressId]);
+        exit;
+    } else {
+        // Send an error JSON response and exit
+        header('Content-Type: application/json');
+        http_response_code(400); // Bad Request
+        echo json_encode(['status' => 'error', 'message' => 'Invalid address ID.']);
+        exit;
+    }
+}
+// --- END PHP BLOCK ---
+
+
+// 1. Initial login check (assuming intent is to redirect if NOT logged in)
 if(!isset($_SESSION['userid']))
 {
+    // The original code had a redundant assignment: $id=$_SESSION['userid']; 
+    // when it immediately checks for its non-existence.
     header('Location: login.php');
     exit();
 }
 
-// Sample checkout data
-$cart_items = [
-    [
-        'id' => 1,
-        'name' => 'Embroidered Silk Saree',
-        'price' => 2499,
-        'image' => 'images/product1.jpg',
-        'size' => 'M',
-        'color' => 'Red',
-        'quantity' => 1
-    ],
-    [
-        'id' => 2,
-        'name' => 'Designer Lehenga Set',
-        'price' => 5999,
-        'image' => 'images/product2.jpg',
-        'size' => 'L',
-        'color' => 'Blue',
-        'quantity' => 1
-    ]
-];
+$id = $_SESSION['userid']; // Get the logged-in user ID
 
-// Sample saved addresses. In a real application, this would come from the database.
-$saved_addresses = [
+// 2. Handle New Address Submission (only runs if the 'Ship' button was pressed)
+if(isset($_POST['save']))
+{
+    $fname = $_POST['fname'];
+    $lname = $_POST['lname'];
+    $add = $_POST['add'];
+    $city = $_POST['city'];
+    $state = $_POST['state'];
+    $pin = $_POST['pin'];
+    $phone = $_POST['phone'];
+
+    if(isset($_POST['check']))
+    {
+        // Save to Database
+        // NOTE: Always use prepared statements in a production environment to prevent SQL injection.
+        $sql = "INSERT INTO `Address`(`UserID`,`FName`, `LName`, `Address`, `City`, `State`, `Pin`, `Phone`) 
+                VALUES ('$id', '$fname', '$lname', '$add', '$city', '$state', '$pin', '$phone')";
+        
+        $result = mysqli_query($con, $sql);
+        
+        if ($result) {
+            // Get the ID of the newly inserted address
+            $newAddressId = mysqli_insert_id($con); 
+            // Also set the session to the new address ID
+            $_SESSION['address'] = $newAddressId; 
+            
+            // Redirect after successful save-to-database
+            header('Location: checkout.php');
+            exit();
+        } else {
+            // Handle error, e.g., $_SESSION['error'] = mysqli_error($con);
+        }
+    }
+    else
+    {
+        // Store in Session (for one-time use if not saved to DB)
+        $_SESSION['address']=0;
+        $_SESSION['fname']=$_POST['fname'];
+        $_SESSION['lname']=$_POST['lname'];
+        $_SESSION['add']=$_POST['add'];
+        $_SESSION['city']=$_POST['city'];
+        $_SESSION['state']=$_POST['state'];
+        $_SESSION['pin']=$_POST['pin'];
+        $_SESSION['phone']=$_POST['phone'];
+        
+        // IMPORTANT: If you set a temporary address, you might want to use a different session key 
+        // or structure to distinguish it from a saved address ID. For simplicity here, we skip 
+        // setting a single $_SESSION['address'] for non-saved temporary entries.
+    }
+}
+
+// NOTE: This payment processing block relies on $_SESSION['address'] being set via AJAX/Redirect flow now.
+if(isset($_POST['payment']))
+{
+    // FIX: Check if a saved address is selected via $_SESSION['address'] 
+    // or if a temporary address is available (via $_SESSION['add'] for non-saved flow)
+    if(isset($_SESSION['address']) || isset($_SESSION['add']))
+    {
+        header('Location: payment.php');
+        exit(); // Added exit for safety
+    } else {
+        // Optional: Error message if no address is selected/entered
+        // $_SESSION['checkout_error'] = "Please select or enter a shipping address.";
+    }
+}
+
+
+// --- Sample checkout data (Fallback if session cart is empty) ---
+
+// In a real app, you'd retrieve $cart_items from $_SESSION['cart']
+if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+    // Sample checkout data used as fallback
+    $cart_items = [
+        [
+            'id' => 1,
+            'name' => 'Embroidered Silk Saree',
+            'price' => 2499,
+            'image' => 'images/product1.jpg',
+            'size' => 'M',
+            'color' => 'Red',
+            'quantity' => 1
+        ],
+        [
+            'id' => 2,
+            'name' => 'Designer Lehenga Set',
+            'price' => 5999,
+            'image' => 'images/product2.jpg',
+            'size' => 'L',
+            'color' => 'Blue',
+            'quantity' => 1
+        ]
+    ];
+} else {
+    // Replace with actual session cart items
+    // $cart_items = $_SESSION['cart'];
+    $cart_items = [/* Your actual cart data structure based on session */];
+}
+
+
+// Sample saved addresses (Used only for structural reference, not display fallback)
+$saved_addresses_sample = [
     [
-        'id' => 1,
+        'id' => 1001, // Using high IDs to avoid conflict with potential DB IDs
         'type' => 'Home',
         'name' => 'Priya Sharma',
         'address' => '123 Fashion Street, Connaught Place',
         'city_pin' => 'New Delhi - 110001',
         'phone' => '+91 98765 43210'
-    ],
-    [
-        'id' => 2,
-        'type' => 'Work',
-        'name' => 'Priya Sharma',
-        'address' => '456 Business Avenue, Cyber City',
-        'city_pin' => 'Gurugram - 122002',
-        'phone' => '+91 98765 43210'
     ]
 ];
+// $saved_addresses = $saved_addresses_sample; // NO LONGER USED AS FALLBACK
 
-
+// --- Calculations ---
 $subtotal = array_sum(array_map(function($item) {
     return $item['price'] * $item['quantity'];
 }, $cart_items));
@@ -362,11 +464,13 @@ $total = $subtotal + $shipping + $tax;
             padding: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            height: 100%; /* Important for card consistency in flex layout */
         }
         .saved-address-card:hover {
             border-color: #f4b6cc;
             background-color: #fef7f8;
         }
+        /* Target the saved-address-card when its sibling radio is checked */
         .form-check-input:checked + .saved-address-card {
              border-color: #ff5f99;
              background-color: #fff0f6;
@@ -401,6 +505,9 @@ $total = $subtotal + $shipping + $tax;
             justify-content: center;
             gap: 0.5rem;
         }
+        
+        .address-link-wrapper { text-decoration: none; color: inherit; display: block; height: 100%; } /* Added for clickable area */
+        .address-link-wrapper:hover { text-decoration: none; } /* Prevents underline on hover */
     </style>
 </head>
 <body>
@@ -425,10 +532,10 @@ $total = $subtotal + $shipping + $tax;
             <div class="d-flex align-items-center gap-3">
                 <div class="nav-icons">
                     <button class="btn nav-icon d-md-none" aria-label="Search" id="mobileSearchTrigger"><i class="bi bi-search"></i></button>
-                    <?php if(isset($_SESSION['user_id'])): ?>
+                    <?php if(isset($_SESSION['user_id'])): // Changed to 'user_id' for consistency if that's the session key used for profile/login check ?>
                         <a href="profile.php" class="nav-icon" title="Profile"><i class="bi bi-person-circle"></i></a>
                     <?php else: ?>
-                       <a href="logout.php" class="nav-icon" title="Logout"><i class="bi bi-box-arrow-in-right"></i></a>
+                        <a href="login.php" class="nav-icon" title="Login"><i class="bi bi-box-arrow-in-right"></i></a>
                     <?php endif; ?>
                     <a href="wishlist.php" class="nav-icon" title="Wishlist"><i class="bi bi-heart"></i></a>
                     <a href="cart.php" class="nav-icon nav-cart" title="Cart">
@@ -493,7 +600,7 @@ $total = $subtotal + $shipping + $tax;
     <div class="container py-5" style="margin-top: 100px;">
         <div class="row">
             <div class="col-lg-8 mb-4">
-                <form id="checkoutForm">
+                <form id="checkoutForm" method="POST">
                     <div class="checkout-container mb-4">
                         
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -509,83 +616,138 @@ $total = $subtotal + $shipping + $tax;
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Receiver's First Name *</label>
-                                        <input type="text" class="form-control" required>
+                                        <input type="text" class="form-control" required name="fname">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Receiver's Last Name *</label>
-                                        <input type="text" class="form-control" required>
+                                        <input type="text" class="form-control" required name="lname">
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Address *</label>
-                                    <input type="text" class="form-control" placeholder="Street Address" required>
+                                    <input type="text" class="form-control" placeholder="Street Address" required name="add">
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">City *</label>
-                                        <input type="text" class="form-control" required>
+                                        <input type="text" class="form-control" required name="city" id="newAddressCity" placeholder="Fill Pin Code..." readonly>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="form-label">State *</label>
-                                        <select class="form-select" required>
-                                            <option value="">Select State</option>
-                                            <option value="delhi">Delhi</option>
-                                            <option value="punjab">Punjab</option>
-                                            <option value="mumbai">Mumbai</option>
-                                            <option value="bangalore">Bangalore</option>
-                                            <option value="chennai">Chennai</option>
-                                            <option value="kolkata">Kolkata</option>
-                                        </select>
+                                        <input type="text" class="form-control" required name="state" id="newAddressState" placeholder="Fill Pin Code..." readonly>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="form-label">PIN Code *</label>
-                                        <input type="text" class="form-control" required>
+                                        <input type="text" class="form-control" required name="pin" id="newAddressPin" pattern="[0-9]{6}" maxlength="6">
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Contact Number *</label>
-                                    <input type="tel" class="form-control" placeholder="10-digit mobile number" required pattern="[0-9]{10}">
+                                    <input type="tel" class="form-control" placeholder="10-digit mobile number" required pattern="[0-9]{10}" name="phone">
                                 </div>
                                 
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="saveAddress" style="display: inline-block;">
+                                        <input class="form-check-input" type="checkbox" value="1" id="saveAddress" style="display: inline-block;" name="check">
                                         <label class="form-check-label" for="saveAddress">
                                             Save this address
                                         </label>
                                     </div>
-                                    <button type="submit" form="checkoutForm" class="btn btn-dark btn-ship">
+                                    <button type="submit" class="btn btn-dark btn-ship" name="save">
                                         <span>Ship</span>
                                         <i class="bi bi-truck"></i>
                                     </button>
                                 </div>
-
                             </div>
                         </div>
 
                         <div id="savedAddressesWrapper">
                             <h5 class="mb-3"><i class="bi bi-journal-bookmark me-2"></i>Or Select a Saved Address</h5>
-                            <?php if (empty($saved_addresses)): ?>
-                                <div class="alert alert-info">
-                                    You have no saved addresses. Please add a new one above.
-                                </div>
-                            <?php else: ?>
-                                <?php foreach ($saved_addresses as $index => $address): ?>
-                                    <label for="address-<?php echo $address['id']; ?>" class="w-100 mb-2">
-                                        <input class="form-check-input" type="radio" name="selected_address" value="<?php echo $address['id']; ?>" id="address-<?php echo $address['id']; ?>" <?php echo $index === 0 ? 'checked' : ''; ?>>
-                                        <div class="saved-address-card">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <span class="badge bg-secondary mb-2"><?php echo htmlspecialchars($address['type']); ?></span>
-                                                    <p class="mb-1 fw-bold"><?php echo htmlspecialchars($address['name']); ?></p>
-                                                    <p class="mb-1 text-muted small"><?php echo htmlspecialchars($address['address']); ?>, <?php echo htmlspecialchars($address['city_pin']); ?></p>
-                                                    <p class="mb-0 text-muted small">Phone: <?php echo htmlspecialchars($address['phone']); ?></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <?php
+                                // 1. Logic to fetch saved addresses from the database
+                                $sql_fetch="SELECT * FROM `Address` WHERE `UserID`='$id' ORDER BY AddressID DESC";
+                                
+                                $addresses_to_display = [];
+                                
+                                // --- FIX: Check for connection and execute query ---
+                                if (isset($con) && $con) {
+                                    $result_fetch=mysqli_query($con,$sql_fetch);
+                                    
+                                    if ($result_fetch) {
+                                        $rows_count=mysqli_num_rows($result_fetch);
+                                        
+                                        if($rows_count > 0)
+                                        {
+                                            // Fetch addresses from the database
+                                            while($row = mysqli_fetch_assoc($result_fetch)) {
+                                                // The 'type' key should ideally come from a column, but for now we set it to 'Saved'
+                                                $addresses_to_display[] = [
+                                                    'id' => $row['AddressID'],
+                                                    'type' => 'Saved', // Defaulting to 'Saved' for DB entries
+                                                    'name' => htmlspecialchars($row['FName'] . ' ' . $row['LName']),
+                                                    'address' => htmlspecialchars($row['Address']),
+                                                    'city_pin' => htmlspecialchars($row['City'] . ' - ' . $row['Pin']),
+                                                    'phone' => htmlspecialchars($row['Phone'])
+                                                ];
+                                            }
+                                        }
+                                    } else {
+                                        // Optional: Handle query error
+                                        // echo "<div class='alert alert-danger'>Error fetching addresses: " . mysqli_error($con) . "</div>";
+                                    }
+                                } else {
+                                    // Optional: Handle connection failure
+                                    // echo "<div class='alert alert-danger'>Database connection failed.</div>";
+                                }
+                                // --- END FIX ---
+                                
+                                // 2. If no addresses from DB, do NOT use sample, and display a message
+                                if (empty($addresses_to_display)) {
+                                    echo "<div class='alert alert-info'>
+                                        You have no saved addresses. Please use the **Add New Address** option above to continue.
+                                    </div>";
+                                }
+
+                                // Determine which address ID should be checked and/or set in session if none exists
+                                $checked_address_id = null;
+                                if (isset($_SESSION['address']) && is_numeric($_SESSION['address'])) {
+                                    $checked_address_id = (int)$_SESSION['address'];
+                                } else if (!empty($addresses_to_display)) {
+                                    // Default to the first address if session isn't set, and set the session here (optional, but convenient)
+                                    $checked_address_id = $addresses_to_display[0]['id'];
+                                    $_SESSION['address'] = $checked_address_id; // Set default session on load
+                                }
+
+                            ?>
+                            
+                            <div class="row">
+    <?php foreach ($addresses_to_display as $address): ?>
+        <div class="col-12 col-md-6 mb-3">
+            
+            <label for="address-<?php echo $address['id']; ?>" class="w-100 h-100">
+                <input class="form-check-input address-radio-selector" 
+                       type="radio" 
+                       name="selected_address" 
+                       value="<?php echo $address['id'];?>"
+                       id="address-<?php echo $address['id']; ?>" 
+                       <?php echo $address['id'] === $checked_address_id ? 'checked' : ''; ?>
+                       
+                       >
+                
+                <div class="saved-address-card h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge bg-secondary mb-2"><?php echo $address['type']; ?></span>
+                            <p class="mb-1 fw-bold"><?php echo $address['name']; ?></p>
+                            <p class="mb-1 text-muted small"><?php echo $address['address']; ?>, <?php echo $address['city_pin']; ?></p>
+                            <p class="mb-0 text-muted small">Phone: <?php echo $address['phone']; ?></p>
+                        </div>
+                    </div>
+                </div>
+            </label>
+        </div>
+    <?php endforeach; ?>
+</div>
                         </div>
                     </div>
                 </form>
@@ -630,11 +792,11 @@ $total = $subtotal + $shipping + $tax;
                         <strong>Total:</strong>
                         <strong class="text-danger">₹<?php echo number_format($total); ?></strong>
                     </div>
-                    
-                    <button type="submit" form="checkoutForm" class="btn btn-primary-custom w-100 mb-3">
+                    <form method="POST">
+                    <button type="submit" class="btn btn-primary-custom w-100 mb-3" name="payment">
                         <i class="bi bi-lock me-2"></i>Proceed to Payment
                     </button>
-                    
+                    </form>
                     <div class="text-center">
                         <small class="text-muted">By proceeding, you agree to our Terms & Conditions</small>
                     </div>
@@ -643,7 +805,10 @@ $total = $subtotal + $shipping + $tax;
         </div>
     </div>
 
-    <?php include 'footer.php'; ?>
+    <?php 
+    // Assuming 'footer.php' exists and contains your site's footer content
+    // include 'footer.php'; 
+    ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -693,7 +858,64 @@ $total = $subtotal + $shipping + $tax;
             const toggleBtn = document.getElementById('toggleAddressFormBtn');
             const savedAddressesWrapper = document.getElementById('savedAddressesWrapper');
             
+            // Elements for PIN Code lookup
+            const newAddressPin = document.getElementById('newAddressPin');
+            const newAddressState = document.getElementById('newAddressState');
+            const newAddressCity = document.getElementById('newAddressCity'); 
+            const shipButton = document.querySelector('button[name="save"]'); // New
+
+            // API Integration for PIN Code to State and City lookup
+            const fetchAddressDetailsFromPinCode = async () => {
+                const pinCode = newAddressPin.value;
+                
+                // Reset city and state fields and their validation status
+                newAddressCity.value = '';
+                newAddressState.value = '';
+                newAddressPin.classList.remove('is-invalid');
+                newAddressCity.classList.remove('is-invalid');
+                newAddressState.classList.remove('is-invalid');
+                
+                if (pinCode.length !== 6 || !/^\d{6}$/.test(pinCode)) {
+                    return; 
+                }
+                
+                newAddressCity.value = 'Loading...';
+                newAddressState.value = 'Loading...';
+
+                try {
+                    const response = await fetch(`https://api.postalpincode.in/pincode/${pinCode}`);
+                    const data = await response.json();
+
+                    if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+                        const postOffice = data[0].PostOffice[0];
+                        const city = postOffice.District; 
+                        const state = postOffice.State;
+                        
+                        newAddressCity.value = city; 
+                        newAddressState.value = state; 
+                    } else {
+                        newAddressCity.value = '';
+                        newAddressState.value = 'Invalid PIN Code';
+                        newAddressPin.classList.add('is-invalid');
+                        newAddressState.classList.add('is-invalid');
+                        alert('Invalid PIN Code: No records found.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching PIN code data:', error);
+                    newAddressCity.value = '';
+                    newAddressState.value = 'Error';
+                    newAddressState.classList.add('is-invalid');
+                    alert('An error occurred while trying to validate the PIN Code.');
+                }
+            };
+
+            if (newAddressPin) {
+                newAddressPin.addEventListener('blur', fetchAddressDetailsFromPinCode);
+            }
+            // End API Integration
+
             if (addressCollapseEl) {
+                // Select all radio buttons within the saved addresses wrapper
                 const radioButtons = savedAddressesWrapper.querySelectorAll('input[type="radio"]');
 
                 addressCollapseEl.addEventListener('show.bs.collapse', () => {
@@ -718,21 +940,80 @@ $total = $subtotal + $shipping + $tax;
                         radio.disabled = false;
                     });
                     
-                    if (radioButtons.length > 0) {
-                        radioButtons[0].checked = true;
+                    // Check the first radio button to restore a selection, if available
+                    // Use the checked property on page load if one was set by PHP
+                    const checkedRadio = document.querySelector('input[name="selected_address"]:checked');
+                    if (!checkedRadio) {
+                       const firstRadio = document.querySelector('input[name="selected_address"]');
+                        if (firstRadio) {
+                            firstRadio.checked = true;
+                        }
                     }
                 });
             }
 
+            // --- START OF CRITICAL FIX IMPLEMENTATION FOR SESSION UPDATE ---
+            
+            /**
+             * NEW: Event listener to update $_SESSION['address'] via AJAX whenever 
+             * a saved address radio button is checked.
+             */
+            const addressRadios = document.querySelectorAll('.address-radio-selector');
 
+            addressRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        const addressId = this.value; // Get the address ID from the radio value
+                        
+                        // Use Fetch API for a cleaner AJAX call
+                        fetch('checkout.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            // Send the 'action' and 'address_id' for the PHP block to handle
+                            body: 'action=update_session_address&address_id=' + addressId
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                // Session updated successfully. No page reload is necessary.
+                                // console.log('Session updated successfully for Address ID:', data.address_id);
+                            } else {
+                                // console.error('Error updating session:', data.message);
+                                alert('Could not update address selection. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('AJAX Error:', error);
+                            alert('An error occurred during address selection.');
+                            // Fallback if AJAX fails:
+                            // window.location.reload(); 
+                        });
+                    }
+                });
+            });
+            
+            // --- END OF CRITICAL FIX IMPLEMENTATION ---
+
+
+            // The main form submit handler now only focuses on the 'Ship' button if the collapse is open
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-                e.preventDefault();
                 const isAddingNewAddress = addressCollapseEl.classList.contains('show');
-                let isAddressSelected = false;
+                const saveButtonPressed = document.activeElement && document.activeElement.name === 'save';
+                const paymentButtonPressed = document.activeElement && document.activeElement.name === 'payment';
 
-                if (isAddingNewAddress) {
+                if (isAddingNewAddress && saveButtonPressed) {
+                    // Let PHP handle the form submission for saving the new address
+                    // Validation moved to JS before PHP submission for better UX
                     let isValid = true;
                     const formRequiredFields = document.querySelectorAll('#addNewAddressCollapse [required]');
+                    
                     formRequiredFields.forEach(field => {
                         if (!field.value.trim()) {
                             isValid = false;
@@ -742,27 +1023,34 @@ $total = $subtotal + $shipping + $tax;
                         }
                     });
 
+                    // Additional PIN code validation
+                    if (!newAddressState.value || newAddressState.value.toLowerCase().includes('invalid') || newAddressState.value.toLowerCase().includes('error')) {
+                        isValid = false;
+                        newAddressPin.classList.add('is-invalid');
+                        alert('Please enter a valid 6-digit PIN Code to determine the City and State.');
+                    }
+                    
                     if (!isValid) {
-                        alert('Please fill in all required fields for the new address.');
+                        e.preventDefault(); // Stop form submission if validation fails
                         return;
                     }
-                    isAddressSelected = true;
+                    // If validation passes, let the form submit to PHP to process 'save'
+                } else if (!isAddingNewAddress && saveButtonPressed) {
+                    // Prevent submission if 'ship' is pressed but the new address form is hidden
+                    e.preventDefault(); 
+                    alert('Click the "Add New Address" button to use the "Ship" button.');
+                } else if (paymentButtonPressed) {
+                    // The payment button is in a separate form, but if it were here, you'd check $_SESSION['address']
+                    // For now, let the payment form submit as it has its own logic in PHP
                 } else {
-                    const selectedAddress = document.querySelector('input[name="selected_address"]:checked');
-                    if (selectedAddress) {
-                        isAddressSelected = true;
-                    }
+                    // Prevent default form submission on enter key
+                    e.preventDefault(); 
                 }
-                
-                if (!isAddressSelected) {
-                    alert('Please select a shipping address or add a new one.');
-                    return;
-                }
-                
-                alert('Proceeding to payment...');
-                window.location.href = 'order-confirmation.php';
             });
         });
     </script>
 </body>
 </html>
+<?PHP
+    include 'footer.php';
+?>
