@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 13, 2025 at 08:02 PM
+-- Generation Time: Oct 18, 2025 at 01:37 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -20,6 +20,32 @@ SET time_zone = "+00:00";
 --
 -- Database: `ManavikFab`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Address`
+--
+
+CREATE TABLE `Address` (
+  `AddressID` int(10) NOT NULL,
+  `UserID` int(10) NOT NULL,
+  `FName` varchar(50) NOT NULL,
+  `LName` varchar(50) NOT NULL,
+  `Address` varchar(1000) NOT NULL,
+  `City` varchar(50) NOT NULL,
+  `State` varchar(50) NOT NULL,
+  `Pin` int(10) NOT NULL,
+  `Phone` bigint(15) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Address`
+--
+
+INSERT INTO `Address` (`AddressID`, `UserID`, `FName`, `LName`, `Address`, `City`, `State`, `Pin`, `Phone`) VALUES
+(1, 1, 'Divyam', 'Puri', '1047, Street No. 6, Guru Nanak Nagar, Majitha Road', 'Amritsar', 'Punjab', 143001, 6284908998),
+(2, 1, 'Amit', 'Puri', '15-B, Liberty Market, Railway Link Road, INA Colony', 'Amritsar', 'Punjab', 143001, 9878916868);
 
 -- --------------------------------------------------------
 
@@ -148,6 +174,12 @@ INSERT INTO `User` (`UserID`, `Name`, `Email`, `Phone`, `DOB`, `Password`, `Date
 --
 
 --
+-- Indexes for table `Address`
+--
+ALTER TABLE `Address`
+  ADD PRIMARY KEY (`AddressID`);
+
+--
 -- Indexes for table `Admin`
 --
 ALTER TABLE `Admin`
@@ -180,6 +212,12 @@ ALTER TABLE `User`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `Address`
+--
+ALTER TABLE `Address`
+  MODIFY `AddressID` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `Admin`
