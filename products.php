@@ -98,7 +98,7 @@ $products = [
     ],
 ];
 
-$all_categories = ['all','sarees', 'lehengas', 'ethnic', 'western', 'accessories'];
+$all_categories = ['All','sarees', 'lehengas', 'ethnic', 'western', 'accessories'];
 $all_brands = ['ManavikFab Premium', 'Cotton Dreams', 'Glamour Fit', 'Sarees', 'Ethnic Touch'];
 $all_sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 $all_colors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Yellow'];
@@ -452,7 +452,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
         }
 
         .sort-view-bar {
-            /* position: sticky; */
+
             top: 5rem; /* Below fixed header */
             z-index: 50;
             background: #fff;
@@ -592,7 +592,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
         <div class="row">
             <!-- Breadcrumb and Product Count (Myntra-like header) -->
             <div class="col-12">
-                
+               
                 <h1 class="text-2xl font-bold mb-1 text-gray-800">Ethnic Wear for Women</h1>
                 <p class="text-gray-500 mb-4"><?php echo $product_count; ?> Items</p>
                 
@@ -693,14 +693,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
                             <option value="newest">Newest First</option>
                             <option value="popular">Popularity</option>
                         </select>
-                        <div class="btn-group d-none d-md-flex" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary active">
-                                <i class="bi bi-grid-3x3-gap"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-list"></i>
-                            </button>
-                        </div>
+                        <!-- Removed the grid/list view toggle buttons -->
                     </div>
                 </div>
 
@@ -729,7 +722,6 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
                                     <span class="original-price-text text-decoration-line-through">₹<?php echo number_format($product['original_price']); ?></span>
                                     <span class="discount-text">(<?php echo $product['discount']; ?>% OFF)</span>
                                 </div>
-                                <!-- The rating stars and number were here. They have been removed. -->
                                 <!-- No "Add to Cart" button, Myntra typically requires going to the product detail page first -->
                             </div>
                         </div>
