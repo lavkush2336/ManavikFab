@@ -404,7 +404,6 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
             height: 100%;
-            cursor: pointer;
         }
         .product-card:hover {
             transform: none; /* Removed lift effect for flat Myntra look */
@@ -593,13 +592,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
         <div class="row">
             <!-- Breadcrumb and Product Count (Myntra-like header) -->
             <div class="col-12">
-                <nav aria-label="breadcrumb" class="mb-1">
-                    <ol class="breadcrumb bg-transparent p-0 mb-2 text-sm">
-                        <li class="breadcrumb-item"><a href="#" class="text-gray-500 hover:text-pink-600">Home</a></li>
-                        <li class="breadcrumb-item"><a href="#" class="text-gray-500 hover:text-pink-600">Clothing</a></li>
-                        <li class="breadcrumb-item active text-gray-800 font-semibold" aria-current="page">Ethnic Wear</li>
-                    </ol>
-                </nav>
+                
                 <h1 class="text-2xl font-bold mb-1 text-gray-800">Ethnic Wear for Women</h1>
                 <p class="text-gray-500 mb-4"><?php echo $product_count; ?> Items</p>
                 
@@ -736,14 +729,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
                                     <span class="original-price-text text-decoration-line-through">₹<?php echo number_format($product['original_price']); ?></span>
                                     <span class="discount-text">(<?php echo $product['discount']; ?>% OFF)</span>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="text-warning me-1 text-sm">
-                                        <?php for($i = 1; $i <= 5; $i++): ?>
-                                            <i class="bi bi-star-fill" style="font-size: 0.75rem; color: #ff905a;"></i>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <small class="text-muted text-xs">(<?php echo $product['rating']; ?>)</small>
-                                </div>
+                                <!-- The rating stars and number were here. They have been removed. -->
                                 <!-- No "Add to Cart" button, Myntra typically requires going to the product detail page first -->
                             </div>
                         </div>
