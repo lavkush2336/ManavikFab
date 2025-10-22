@@ -98,7 +98,7 @@ $products = [
     ],
 ];
 
-$all_categories = ['sarees', 'lehengas', 'ethnic', 'western', 'accessories'];
+$all_categories = ['all','sarees', 'lehengas', 'ethnic', 'western', 'accessories'];
 $all_brands = ['ManavikFab Premium', 'Cotton Dreams', 'Glamour Fit', 'Sarees', 'Ethnic Touch'];
 $all_sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 $all_colors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Yellow'];
@@ -452,7 +452,7 @@ $products_to_display = array_slice($filtered_products, 0, $display_count);
         }
 
         .sort-view-bar {
-            position: sticky;
+            /* position: sticky; */
             top: 5rem; /* Below fixed header */
             z-index: 50;
             background: #fff;
