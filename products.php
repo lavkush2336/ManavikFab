@@ -8,6 +8,114 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
 $price_min = isset($_GET['price_min']) ? $_GET['price_min'] : '';
 $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
+
+// --- Dummy Data and Filtering Logic ---
+$products = [
+    [
+        'id' => 1,
+        'name' => 'Embroidered Silk Saree',
+        'brand' => 'ManavikFab Premium',
+        'category' => 'sarees',
+        'price' => 2499,
+        'original_price' => 3999,
+        'image' => 'images/product1.jpg',
+        'rating' => 4.5,
+        'reviews' => 128,
+        'discount' => 37,
+        'color' => 'Red',
+        'sizes' => ['S', 'M', 'L']
+    ],
+    [
+        'id' => 2,
+        'name' => 'Designer Lehenga Set',
+        'brand' => 'Sarees',
+        'category' => 'lehengas',
+        'price' => 5999,
+        'original_price' => 8999,
+        'image' => 'images/product2.jpg',
+        'rating' => 4.8,
+        'reviews' => 89,
+        'discount' => 33,
+        'color' => 'Blue',
+        'sizes' => ['M', 'L', 'XL']
+    ],
+    [
+        'id' => 3,
+        'name' => 'Cotton Kurti with Palazzo',
+        'brand' => 'Cotton Dreams',
+        'category' => 'ethnic',
+        'price' => 1299,
+        'original_price' => 1999,
+        'image' => 'images/product3.jpg',
+        'rating' => 4.3,
+        'reviews' => 156,
+        'discount' => 35,
+        'color' => 'Green',
+        'sizes' => ['XS', 'S', 'M']
+    ],
+    [
+        'id' => 4,
+        'name' => 'Western Dress Collection',
+        'brand' => 'Glamour Fit',
+        'category' => 'western',
+        'price' => 1899,
+        'original_price' => 2499,
+        'image' => 'images/product4.jpg',
+        'rating' => 4.6,
+        'reviews' => 203,
+        'discount' => 24,
+        'color' => 'Pink',
+        'sizes' => ['S', 'M', 'L']
+    ],
+    // Added more data for demonstration of filters
+    [
+        'id' => 5,
+        'name' => 'Bridal Lehenga Set',
+        'brand' => 'ManavikFab Premium',
+        'category' => 'lehengas',
+        'price' => 8999,
+        'original_price' => 12999,
+        'image' => 'images/product5.jpg',
+        'rating' => 4.9,
+        'reviews' => 67,
+        'discount' => 31,
+        'color' => 'Red',
+        'sizes' => ['L', 'XL']
+    ],
+    [
+        'id' => 6,
+        'name' => 'Silk Anarkali Suit',
+        'brand' => 'Cotton Dreams',
+        'category' => 'ethnic',
+        'price' => 3499,
+        'original_price' => 4999,
+        'image' => 'images/product6.jpg',
+        'rating' => 4.4,
+        'reviews' => 142,
+        'discount' => 30,
+        'color' => 'Purple',
+        'sizes' => ['XS', 'S']
+    ],
+];
+
+$all_categories = ['sarees', 'lehengas', 'ethnic', 'western', 'accessories'];
+$all_brands = ['ManavikFab Premium', 'Cotton Dreams', 'Glamour Fit', 'Sarees', 'Ethnic Touch'];
+$all_sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+$all_colors = ['Red', 'Blue', 'Green', 'Pink', 'Purple', 'Yellow'];
+
+// Filter products based on category, price, etc. (basic PHP filtering for demo)
+$filtered_products = $products;
+
+if($category) {
+    $filtered_products = array_filter($filtered_products, function($product) use ($category) {
+        return $product['category'] == $category;
+    });
+}
+// You would expand the filtering logic here for brands, prices, etc.
+
+$product_count = count($filtered_products);
+$display_count = min(12, $product_count);
+$products_to_display = array_slice($filtered_products, 0, $display_count);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,11 +135,11 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
-            padding-top: 8rem; /* ADDED: This creates space for the fixed header */
+            background: #f1f1f1; /* Changed background for contrast */
+            padding-top: 5rem; 
         }
 
-        /* HEADER CSS FROM index.php */
+        /* HEADER CSS (Kept from original) */
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
@@ -46,7 +154,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             right: 0;
             z-index: 1050;
             background: #ffffff;
-            padding: 1rem 0;
+            padding: 0.5rem 0; /* Reduced padding */
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         }
 
@@ -154,7 +262,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             color: #444;
         }
 
-        /* Fullscreen search overlay */
+        /* Fullscreen search overlay - Kept */
         .search-overlay {
             position: fixed;
             top: 0;
@@ -254,70 +362,146 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             color: #888 !important;
             font-weight: 500;
         }
-
-        @media (max-width:992px){
-            .site-navbar .nav-links { display: none; }
-            .site-navbar .nav-icons { flex-grow: 1; justify-content: flex-end; }
-            .site-navbar.scrolled .nav-icon, .site-navbar.scrolled .navbar-brand { color: #444 !important; }
-            .nav-icon { color: #2d2d2d; }
-        }
         /* END HEADER CSS */
+        
+        /* NEW STYLING FOR MYNTRA-LIKE EXPERIENCE */
+        .filter-sidebar {
+            /* On large screens (lg), the sidebar becomes fixed */
+            position: sticky;
+            top: 5rem; /* Space below the fixed header */
+            height: calc(100vh - 5rem); /* Full height minus header height */
+            overflow-y: auto; /* Allows scrolling within the filter panel */
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            z-index: 10;
+        }
+
+        /* Custom scrollbar for filter panel (optional, but nice) */
+        .filter-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .filter-sidebar::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        .filter-heading {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #535766; /* Myntra-like gray */
+            border-bottom: 1px solid #eaeaec;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            margin-top: 0.5rem;
+        }
 
         .product-card {
+            /* Adjusted for a cleaner, modern look */
             background: white;
-            border-radius: 1rem;
+            border-radius: 0.25rem; /* Sharper corners */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
             height: 100%;
+            cursor: pointer;
         }
         .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: none; /* Removed lift effect for flat Myntra look */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #f8c9d8 0%, #f4b6cc 100%);
-            border: none;
-            color: #2d2d2d;
+        .product-card .card-body {
+            padding: 0.75rem;
+        }
+        .product-card .card-title {
+            font-size: 1rem;
             font-weight: 600;
-            padding: 0.75rem 2rem;
-            border-radius: 2rem;
-            transition: all 0.3s ease;
+            margin-bottom: 0.25rem;
         }
-        .btn-primary-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        .product-card .card-text-brand {
+            font-size: 0.9rem;
+            color: #535766; /* Myntra gray */
+            font-weight: 500;
+            margin-bottom: 0;
         }
-        .filter-sidebar {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            height: fit-content;
+        .product-card .card-text-name {
+            font-size: 0.9rem;
+            color: #535766;
+            margin-bottom: 0.5rem;
         }
-        .footer {
-            background: #2d2d2d;
-            color: white;
+        
+        .price-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #282c3f; /* Dark text for price */
         }
-        .search-bar {
-            border-radius: 2rem;
-            border: 2px solid #f8c9d8;
-            padding: 0.75rem 1.5rem;
+        .original-price-text {
+            font-size: 0.9rem;
+            color: #888;
+            margin-left: 0.5rem;
         }
-        .search-bar:focus {
-            border-color: #f4b6cc;
-            box-shadow: 0 0 0 0.2rem rgba(248, 201, 216, 0.3);
+        .discount-text {
+            font-size: 0.9rem;
+            color: #ff905a; /* Discount color */
+            font-weight: 600;
+            margin-left: 0.5rem;
         }
-        .pagination .page-link {
-            color: #f4b6cc;
-            border-color: #f8c9d8;
+
+        .btn-primary-custom {
+            /* Hidden on this layout, filter applies automatically */
+            display: none; 
         }
-        .pagination .page-item.active .page-link {
-            background-color: #f4b6cc;
-            border-color: #f4b6cc;
-            color: white;
+
+        .sort-view-bar {
+            position: sticky;
+            top: 5rem; /* Below fixed header */
+            z-index: 50;
+            background: #fff;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); /* subtle shadow to lift it */
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        /* Responsive filter sidebar toggle */
+        @media (max-width: 991.98px) {
+            .filter-sidebar-wrapper {
+                position: fixed;
+                top: 5rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 5rem);
+                background: white;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                overflow-y: auto;
+            }
+            .filter-sidebar-wrapper.active {
+                transform: translateX(0);
+            }
+            .filter-sidebar {
+                position: relative; /* Override sticky inside wrapper */
+                height: auto;
+                top: 0;
+                border-radius: 0;
+            }
+        }
+        
+        /* Checkbox customization (for cleaner look) */
+        .form-check-input:checked {
+            background-color: #ff3f6c; /* Myntra Pink */
+            border-color: #ff3f6c;
+        }
+        .form-check-input {
+            border-radius: 0.15rem; /* Square checkboxes */
+            border-width: 2px;
         }
     </style>
 </head>
 <body>
+    <!-- Navbar (Kept from original) -->
     <nav class="site-navbar">
         <div class="container d-flex align-items-center justify-content-between">
             <a class="navbar-brand" href="index.php">ManavikFab</a>
@@ -342,7 +526,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
                     <?php if(isset($_SESSION['user_id'])): ?>
                         <a href="profile.php" class="nav-icon" title="Profile"><i class="bi bi-person-circle"></i></a>
                     <?php else: ?>
-                       <a href="logout.php" class="nav-icon" title="Logout"><i class="bi bi-box-arrow-in-right"></i></a>
+                       <a href="login.php" class="nav-icon" title="Login/Signup"><i class="bi bi-person-circle"></i></a>
                     <?php endif; ?>
                     <a href="wishlist.php" class="nav-icon" title="Wishlist"><i class="bi bi-heart"></i></a>
                     <a href="cart.php" class="nav-icon nav-cart" title="Cart">
@@ -350,7 +534,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
                         <span class="nav-badge">3</span>
                     </a>
                 </div>
-                <button class="btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavCollapse">
+                <button class="btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavCollapse" aria-expanded="false" aria-controls="siteNavCollapse">
                     <i class="bi bi-list" style="font-size:1.5rem"></i>
                 </button>
             </div>
@@ -366,6 +550,7 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
         </div>
     </nav>
     
+    <!-- Search Overlay (Kept from original) -->
     <div class="search-overlay" id="searchOverlay">
         <div class="search-overlay-content">
             <div class="d-flex align-items-center justify-content-between mb-4">
@@ -402,133 +587,124 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             </div>
         </div>
     </div>
-
-    <div class="container py-5">
+    
+    <!-- Main Content Grid -->
+    <div class="container py-3">
         <div class="row">
-            <div class="col-lg-3 mb-4">
-                <div class="filter-sidebar">
-                    <h5 class="mb-3">Filters</h5>
+            <!-- Breadcrumb and Product Count (Myntra-like header) -->
+            <div class="col-12">
+                <nav aria-label="breadcrumb" class="mb-1">
+                    <ol class="breadcrumb bg-transparent p-0 mb-2 text-sm">
+                        <li class="breadcrumb-item"><a href="#" class="text-gray-500 hover:text-pink-600">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-gray-500 hover:text-pink-600">Clothing</a></li>
+                        <li class="breadcrumb-item active text-gray-800 font-semibold" aria-current="page">Ethnic Wear</li>
+                    </ol>
+                </nav>
+                <h1 class="text-2xl font-bold mb-1 text-gray-800">Ethnic Wear for Women</h1>
+                <p class="text-gray-500 mb-4"><?php echo $product_count; ?> Items</p>
+                
+                <!-- Mobile Filter Trigger -->
+                <button id="mobileFilterToggle" class="btn btn-sm btn-outline-secondary d-lg-none mb-3 w-100">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3 filter-sidebar-wrapper d-lg-block" id="filterSidebarWrapper">
+                <form method="GET" action="products.php" class="filter-sidebar">
+                    <div class="d-flex justify-content-between align-items-center mb-4 d-lg-none">
+                        <h5 class="mb-0">Filter By</h5>
+                        <button type="button" class="btn-close" id="closeFilterSidebar" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="mb-4">
+                        <h6 class="filter-heading">Categories</h6>
+                        <?php foreach($all_categories as $cat): ?>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="category" id="cat_<?php echo $cat; ?>" value="<?php echo $cat; ?>" onchange="this.form.submit()" <?php echo $category == $cat ? 'checked' : ''; ?>>
+                                <label class="form-check-label text-gray-700" for="cat_<?php echo $cat; ?>"><?php echo ucwords($cat); ?></label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                     
+                    <!-- Brand Filter -->
                     <div class="mb-4">
-                        <h6>Categories</h6>
+                        <h6 class="filter-heading">Brand</h6>
+                        <?php foreach(array_slice($all_brands, 0, 5) as $brand): ?>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="brand[]" id="brand_<?php echo str_replace(' ', '_', $brand); ?>" value="<?php echo $brand; ?>">
+                                <label class="form-check-label text-gray-700" for="brand_<?php echo str_replace(' ', '_', $brand); ?>"><?php echo $brand; ?></label>
+                            </div>
+                        <?php endforeach; ?>
+                        <a href="#" class="text-pink-600 hover:text-pink-800 text-sm mt-1 d-block">Show more...</a>
+                    </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="mb-4">
+                        <h6 class="filter-heading">Price Range</h6>
+                        <div class="d-flex align-items-center">
+                            <input type="number" class="form-control form-control-sm me-2" placeholder="Min" name="price_min" value="<?php echo $price_min; ?>">
+                            <span class="text-gray-500">-</span>
+                            <input type="number" class="form-control form-control-sm ms-2" placeholder="Max" name="price_max" value="<?php echo $price_max; ?>">
+                        </div>
+                    </div>
+                    
+                    <!-- Discount Filter (New) -->
+                    <div class="mb-4">
+                        <h6 class="filter-heading">Discount Range</h6>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="all" value="" <?php echo $category == '' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="all">All Categories</label>
+                            <input class="form-check-input" type="radio" name="discount" id="disc_10" value="10">
+                            <label class="form-check-label text-gray-700" for="disc_10">10% and above</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="ethnic" value="ethnic" <?php echo $category == 'ethnic' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="ethnic">Ethnic Wear</label>
+                            <input class="form-check-input" type="radio" name="discount" id="disc_30" value="30">
+                            <label class="form-check-label text-gray-700" for="disc_30">30% and above</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="western" value="western" <?php echo $category == 'western' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="western">Western Wear</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="sarees" value="sarees" <?php echo $category == 'sarees' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="sarees">Sarees</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="lehengas" value="lehengas" <?php echo $category == 'lehengas' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="lehengas">Lehengas</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="category" id="accessories" value="accessories" <?php echo $category == 'accessories' ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="accessories">Accessories</label>
+                            <input class="form-check-input" type="radio" name="discount" id="disc_50" value="50">
+                            <label class="form-check-label text-gray-700" for="disc_50">50% and above</label>
                         </div>
                     </div>
 
+                    <!-- Size Filter -->
                     <div class="mb-4">
-                        <h6>Price Range</h6>
-                        <div class="row">
-                            <div class="col-6">
-                                <input type="number" class="form-control" placeholder="Min" name="price_min" value="<?php echo $price_min; ?>">
+                        <h6 class="filter-heading">Size</h6>
+                        <?php foreach($all_sizes as $size): ?>
+                            <div class="form-check form-check-inline me-2">
+                                <input class="form-check-input" type="checkbox" id="size_<?php echo $size; ?>" name="size[]" value="<?php echo $size; ?>">
+                                <label class="form-check-label text-gray-700" for="size_<?php echo $size; ?>"><?php echo $size; ?></label>
                             </div>
-                            <div class="col-6">
-                                <input type="number" class="form-control" placeholder="Max" name="price_max" value="<?php echo $price_max; ?>">
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
-
-                    <div class="mb-4">
-                        <h6>Size</h6>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="xs" name="size[]" value="XS">
-                            <label class="form-check-label" for="xs">XS</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="s" name="size[]" value="S">
-                            <label class="form-check-label" for="s">S</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="m" name="size[]" value="M">
-                            <label class="form-check-label" for="m">M</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="l" name="size[]" value="L">
-                            <label class="form-check-label" for="l">L</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="xl" name="size[]" value="XL">
-                            <label class="form-check-label" for="xl">XL</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="xxl" name="size[]" value="XXL">
-                            <label class="form-check-label" for="xxl">XXL</label>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h6>Color</h6>
-                        <div class="d-flex flex-wrap gap-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="red" name="color[]" value="red">
-                                <label class="form-check-label" for="red">Red</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="blue" name="color[]" value="blue">
-                                <label class="form-check-label" for="blue">Blue</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="green" name="color[]" value="green">
-                                <label class="form-check-label" for="green">Green</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="yellow" name="color[]" value="yellow">
-                                <label class="form-check-label" for="yellow">Yellow</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="pink" name="color[]" value="pink">
-                                <label class="form-check-label" for="pink">Pink</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="purple" name="color[]" value="purple">
-                                <label class="form-check-label" for="purple">Purple</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary-custom w-100">Apply Filters</button>
-                </div>
+                    
+                    <!-- Submit button for mobile form -->
+                    <button type="submit" class="btn btn-primary-custom w-100 d-lg-none mt-4">Show Products</button>
+                </form>
             </div>
 
+            <!-- Product Grid -->
             <div class="col-lg-9">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <span class="text-muted">Showing 1-12 of 48 products</span>
+                <!-- Sort and View Bar (Sticky) -->
+                <div class="sort-view-bar d-flex justify-content-between align-items-center">
+                    <div class="text-sm font-semibold text-gray-700 d-none d-md-block">
+                        Sort By: <span class="font-normal text-gray-500">Recommended</span>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <select class="form-select" style="width: auto;">
-                            <option value="newest">Newest First</option>
+                    <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
+                        <select class="form-select form-select-sm" style="width: auto;">
+                            <option value="recommended">Recommended</option>
                             <option value="price-low">Price: Low to High</option>
                             <option value="price-high">Price: High to Low</option>
-                            <option value="popular">Most Popular</option>
-                            <option value="rating">Highest Rated</option>
+                            <option value="newest">Newest First</option>
+                            <option value="popular">Popularity</option>
                         </select>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary active">
+                        <div class="btn-group d-none d-md-flex" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary active">
                                 <i class="bi bi-grid-3x3-gap"></i>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
                                 <i class="bi bi-list"></i>
                             </button>
                         </div>
@@ -537,189 +713,38 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
 
                 <div class="row g-4">
                     <?php
-                    // Sample products data
-                    $products = [
-                        [
-                            'id' => 1,
-                            'name' => 'Embroidered Silk Saree',
-                            'category' => 'sarees',
-                            'price' => 2499,
-                            'original_price' => 3999,
-                            'image' => 'images/product1.jpg',
-                            'rating' => 4.5,
-                            'reviews' => 128,
-                            'discount' => 37
-                        ],
-                        [
-                            'id' => 2,
-                            'name' => 'Designer Lehenga Set',
-                            'category' => 'lehengas',
-                            'price' => 5999,
-                            'original_price' => 8999,
-                            'image' => 'images/product2.jpg',
-                            'rating' => 4.8,
-                            'reviews' => 89,
-                            'discount' => 33
-                        ],
-                        [
-                            'id' => 3,
-                            'name' => 'Cotton Kurti with Palazzo',
-                            'category' => 'ethnic',
-                            'price' => 1299,
-                            'original_price' => 1999,
-                            'image' => 'images/product3.jpg',
-                            'rating' => 4.3,
-                            'reviews' => 156,
-                            'discount' => 35
-                        ],
-                        [
-                            'id' => 4,
-                            'name' => 'Western Dress Collection',
-                            'category' => 'western',
-                            'price' => 1899,
-                            'original_price' => 2499,
-                            'image' => 'images/product4.jpg',
-                            'rating' => 4.6,
-                            'reviews' => 203,
-                            'discount' => 24
-                        ],
-                        [
-                            'id' => 5,
-                            'name' => 'Bridal Lehenga Set',
-                            'category' => 'lehengas',
-                            'price' => 8999,
-                            'original_price' => 12999,
-                            'image' => 'images/product5.jpg',
-                            'rating' => 4.9,
-                            'reviews' => 67,
-                            'discount' => 31
-                        ],
-                        [
-                            'id' => 6,
-                            'name' => 'Silk Anarkali Suit',
-                            'category' => 'ethnic',
-                            'price' => 3499,
-                            'original_price' => 4999,
-                            'image' => 'images/product6.jpg',
-                            'rating' => 4.4,
-                            'reviews' => 142,
-                            'discount' => 30
-                        ],
-                        [
-                            'id' => 7,
-                            'name' => 'Casual Western Dress',
-                            'category' => 'western',
-                            'price' => 999,
-                            'original_price' => 1499,
-                            'image' => 'images/product7.jpg',
-                            'rating' => 4.2,
-                            'reviews' => 178,
-                            'discount' => 33
-                        ],
-                        [
-                            'id' => 8,
-                            'name' => 'Designer Saree Collection',
-                            'category' => 'sarees',
-                            'price' => 3999,
-                            'original_price' => 5999,
-                            'image' => 'images/product8.jpg',
-                            'rating' => 4.7,
-                            'reviews' => 95,
-                            'discount' => 33
-                        ],
-                        [
-                            'id' => 9,
-                            'name' => 'Party Wear Lehenga',
-                            'category' => 'lehengas',
-                            'price' => 4499,
-                            'original_price' => 6999,
-                            'image' => 'images/product9.jpg',
-                            'rating' => 4.5,
-                            'reviews' => 113,
-                            'discount' => 36
-                        ],
-                        [
-                            'id' => 10,
-                            'name' => 'Ethnic Kurti Set',
-                            'category' => 'ethnic',
-                            'price' => 899,
-                            'original_price' => 1299,
-                            'image' => 'images/product10.jpg',
-                            'rating' => 4.1,
-                            'reviews' => 234,
-                            'discount' => 31
-                        ],
-                        [
-                            'id' => 11,
-                            'name' => 'Western Top & Jeans',
-                            'category' => 'western',
-                            'price' => 1499,
-                            'original_price' => 1999,
-                            'image' => 'images/product11.jpg',
-                            'rating' => 4.3,
-                            'reviews' => 167,
-                            'discount' => 25
-                        ],
-                        [
-                            'id' => 12,
-                            'name' => 'Traditional Saree',
-                            'category' => 'sarees',
-                            'price' => 1799,
-                            'original_price' => 2499,
-                            'image' => 'images/product12.jpg',
-                            'rating' => 4.6,
-                            'reviews' => 189,
-                            'discount' => 28
-                        ]
-                    ];
-
-                    // Filter products based on category
-                    if($category) {
-                        $products = array_filter($products, function($product) use ($category) {
-                            return $product['category'] == $category;
-                        });
-                    }
-
-                    foreach($products as $product):
+                    // Display products in the grid
+                    foreach($products_to_display as $product):
                     ?>
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card">
-                            <div class="position-relative">
-                                <img src="<?php echo $product['image']; ?>" class="card-img-top" alt="<?php echo $product['name']; ?>">
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-danger"><?php echo $product['discount']; ?>% OFF</span>
-                                </div>
-                                <div class="position-absolute top-0 end-0 m-2">
-                                    <button class="btn btn-sm btn-light rounded-circle">
-                                        <i class="bi bi-heart"></i>
+                            <div class="position-relative overflow-hidden">
+                                <img src="<?php echo $product['image']; ?>" class="w-full h-auto object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x600/f0f0f0/333?text=Product+Image';" alt="<?php echo $product['name']; ?>">
+                                <div class="position-absolute bottom-0 end-0 m-2">
+                                    <!-- Simple heart button for wishlist -->
+                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm" style="opacity: 0.8;">
+                                        <i class="bi bi-heart text-danger"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <h6 class="card-title"><?php echo $product['name']; ?></h6>
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="text-warning me-2">
+                                <p class="card-text-brand text-gray-900 font-bold"><?php echo $product['brand']; ?></p>
+                                <p class="card-text-name truncate text-gray-600"><?php echo $product['name']; ?></p>
+                                
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="price-text">₹<?php echo number_format($product['price']); ?></span>
+                                    <span class="original-price-text text-decoration-line-through">₹<?php echo number_format($product['original_price']); ?></span>
+                                    <span class="discount-text">(<?php echo $product['discount']; ?>% OFF)</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="text-warning me-1 text-sm">
                                         <?php for($i = 1; $i <= 5; $i++): ?>
-                                            <i class="bi bi-star<?php echo $i <= $product['rating'] ? '-fill' : ''; ?>"></i>
+                                            <i class="bi bi-star-fill" style="font-size: 0.75rem; color: #ff905a;"></i>
                                         <?php endfor; ?>
                                     </div>
-                                    <small class="text-muted">(<?php echo $product['rating']; ?>)</small>
+                                    <small class="text-muted text-xs">(<?php echo $product['rating']; ?>)</small>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div>
-                                        <span class="fw-bold text-danger">₹<?php echo number_format($product['price']); ?></span>
-                                        <small class="text-muted text-decoration-line-through">₹<?php echo number_format($product['original_price']); ?></small>
-                                    </div>
-                                    <small class="text-muted"><?php echo $product['reviews']; ?> reviews</small>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-primary flex-fill">
-                                        <i class="bi bi-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                    <a href="product-detail.php?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
+                                <!-- No "Add to Cart" button, Myntra typically requires going to the product detail page first -->
                             </div>
                         </div>
                     </div>
@@ -764,12 +789,17 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             onScroll();
         })();
 
-        // Dynamic Search Bar functionality
+        // Dynamic Search Bar functionality (Kept from original)
         document.addEventListener('DOMContentLoaded', function() {
             const searchTrigger = document.getElementById('searchTrigger');
             const mobileSearchTrigger = document.getElementById('mobileSearchTrigger');
             const searchOverlay = document.getElementById('searchOverlay');
             const closeSearchBtn = document.getElementById('closeSearch');
+            
+            // New Filter Toggle Logic
+            const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+            const filterSidebarWrapper = document.getElementById('filterSidebarWrapper');
+            const closeFilterSidebar = document.getElementById('closeFilterSidebar');
 
             const openSearch = () => {
                 if (searchOverlay) {
@@ -784,6 +814,20 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
             const closeSearch = () => {
                 if (searchOverlay) {
                     searchOverlay.classList.remove('active');
+                }
+            };
+            
+            const openFilter = () => {
+                if (filterSidebarWrapper) {
+                    filterSidebarWrapper.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                }
+            };
+
+            const closeFilter = () => {
+                if (filterSidebarWrapper) {
+                    filterSidebarWrapper.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore scrolling
                 }
             };
 
@@ -807,9 +851,31 @@ $price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
                 });
             }
 
+            if (mobileFilterToggle) {
+                mobileFilterToggle.addEventListener('click', openFilter);
+            }
+            
+            if (closeFilterSidebar) {
+                closeFilterSidebar.addEventListener('click', closeFilter);
+            }
+            
+            // Automatically submit the form on radio/checkbox change (Myntra behavior)
+            const filterForm = document.querySelector('.filter-sidebar');
+            if(filterForm) {
+                filterForm.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                    input.addEventListener('change', () => {
+                        // For a real application, you might want to debounce this or only submit on a button press,
+                        // but this mimics the instant filtering of sites like Myntra.
+                        filterForm.submit();
+                    });
+                });
+            }
+
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeSearch();
+                    closeFilter(); // Also close filter sidebar on escape
                 }
             });
         });
